@@ -115,7 +115,7 @@ const Navbar = () => {
                   </div>
                   
                   <div className="flex justify-center">
-                    <Link href='https://admin.atomicity.vercel.app/' className=" w-full" target="_blank">
+                    <Link href='https://admin-atomicity.vercel.app/' className=" w-full" target="_blank">
                       <Button className="w-full ">
                         Apply for Admin
                       </Button>

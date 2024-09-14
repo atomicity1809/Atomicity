@@ -53,6 +53,8 @@ import { notFound } from "next/navigation"; // Import for handling not found pag
 import { useUser } from "@clerk/clerk-react";
 import {toast} from "sonner";
 import EventPageSkeleton from "./EventPageSkeleton";
+import { sendMail } from "@/lib/mail";
+import { sendConfMail } from "../sendConfMail";
 
 interface Event {
   [key: string]: any;
@@ -200,14 +202,33 @@ const EventPage: React.FC = () => {
       //add toaster functionlity here or show message to log in
       return;
     }
+    bang_setLoading(true);
 
     try {
-      const userID = user.id;
       const url = `/api/event/register/${eventId}`;
-
+      const userID = user.id;
+      const eventDate = new Date(event.date).toISOString().split('T')[0];
+      const generateConfirmationNumber = (
+        eventTitle: string,
+        eventId: string,
+        eventDate: string,
+        userId: string
+      ) => {
+        const shortEventTitle = eventTitle.slice(0, 3).toUpperCase(); // First 3 chars of event title
+        const shortEventId = eventId.slice(-4); // Last 4 chars of event ID
+        const shortDate = eventDate.replace(/-/g, '').slice(-6); // Last 6 digits of the event date (yyyymmdd -> mmdd)
+        const shortUserId = userId.slice(-4); // Last 4 chars of user ID
+        const timestamp = Date.now().toString().slice(-5); // Last 5 digits of the current timestamp
+      
+        return `${shortEventTitle}-${shortEventId}-${shortDate}-${shortUserId}-${timestamp}`;
+      };
+      
+      const confirmationNumber = generateConfirmationNumber(event.title, event._id, eventDate, userID);
+      
       const requestBody = {
-        eventId: eventId,
-        userId: userID,
+          eventId: curEventId,
+          userId: userID,
+          confirmationNumber,
       };
       // console.log("from frontend: ",requestBody);
 
@@ -220,21 +241,49 @@ const EventPage: React.FC = () => {
       });
 
       const data = await response.json();
+      
+    
       if (response.status) {
         console.log("Registration successful:", data);
         toast.success("Registration successful");
 
+        const userMail = user?.emailAddresses[0]?.emailAddress || "default@example.com";
+        const userName = user?.fullName || "Default Name";
+        const eventTitle = event.title || "Default Event Title";
+        // const confirmationNumber = 
+
+        // Prepare user data object
+        const userData = {
+            emailAddresses: [{ emailAddress: userMail }],
+            fullName: userName,
+        };
+
+        console.log("test",userData,eventTitle);
+        try {
+            await sendConfMail({ user: userData, event , confirmationNumber });
+            console.log('Confirmation email sent');
+            toast.success("Ticket Sent to Mail !!");
+        } catch (error) {
+            console.error('Error sending email:', error);
+        }
+
+        
         router.push("/events");
+
       } else {
         console.error("Registration failed:");
       }
     } catch (error) {
       console.error("An error occurred during registration:", error);
       toast.error("Unexpected error caused, retry again");
+    }finally{
+      bang_setLoading(false);
     }
   };
 
   const [loading, setLoading] = useState<boolean>(true);
+  const [bang_loading, bang_setLoading] = useState<boolean>(false);
+
   const [error, setError] = useState<string | null>(null);
 
   const pathname = usePathname();
@@ -258,6 +307,7 @@ const EventPage: React.FC = () => {
           });
           console.log("fetchEventData: ", fetchedEventData);
           console.log(fetchedEventData["registeredUsers"].includes(userID));
+
           if (fetchedEventData["registeredUsers"].includes(userID)) {
             setRegisterStatus("Already Registered");
           }
@@ -273,6 +323,12 @@ const EventPage: React.FC = () => {
 
     fetchEventData();
   }, []);
+
+  
+
+  
+
+
 
   return (
 
@@ -620,11 +676,13 @@ const EventPage: React.FC = () => {
                   </div>
                 </div>
                 <Button
-                  className="bg-purple-500 hover:bg-purple-800 w-full text-white py-3 text-lg"
-                  onClick={() => handleEventRegister(event._id)}
+                    className="bg-purple-500 hover:bg-purple-800 w-full text-white py-3 text-lg"
+                    onClick={() => handleEventRegister(event._id)}
+                    disabled={bang_loading} // Disable button when loading
                 >
-                  Bang On !!
+                    {bang_loading ? "Requesting your Ticket..." : "Bang On !!"}
                 </Button>
+
               </div>
             </SheetContent>
           </Sheet>
