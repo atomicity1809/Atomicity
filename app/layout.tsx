@@ -24,6 +24,7 @@ export default function RootLayout({
         <ClerkProvider>
 
           {children}
+          
           <SpeedInsights/>
           <Toaster position="top-center" />
         </ClerkProvider>
