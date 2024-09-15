@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
-    console.log(event);
+    // console.log(event);
     // Initialize registeredUsers if undefined
     if (!event.registeredUsers) {
       event.registeredUsers = [];
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     if (!event.isAvailableToReg) {
       return NextResponse.json(
         { success: false, error: "Registration closed" },
-        { status: 400 }
+        { status: 406 }
       );
     }
 
@@ -55,11 +55,11 @@ export async function POST(req: NextRequest) {
     // const user = await User.findById(userId);
     const user = await User.findOne({ clerkId: userId });
 
-    console.log("line 56: ", user);
+    // console.log("line 56: ", user);
     if (!user) {
       return NextResponse.json(
         { success: false, error: "User not found" },
-        { status: 404 }
+        { status: 408 }
       );
     }
     console.log("step4");
