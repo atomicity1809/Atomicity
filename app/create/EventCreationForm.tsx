@@ -18,7 +18,9 @@ import { ArrowLeft, Calendar as CalendarIcon, InfoIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { CldUploadWidget } from "next-cloudinary";
+// import { uploadToCloudinary } from "@/lib/cloudinary";
+import { CldUploadWidget, CloudinaryUploadWidgetInfo } from "next-cloudinary";
+
 import { toast } from "sonner";
 
 interface EventData {
@@ -276,20 +278,20 @@ const EventCreationForm: React.FC = () => {
           <div className="flex items-center space-x-2">
             <CldUploadWidget
               uploadPreset="atomicity"
-              resource_type="image"
-              onSuccess={({ event, info }) => {
-                setEventData((prev) => ({
-                  ...prev,
-                  coverImg: info["secure_url"],
-                }));
+              onSuccess={(result: any) => {
+                if (result.event === "success") {
+                  const info = result.info;
+                  if (info && "secure_url" in info) {
+                    setEventData((prev) => ({
+                      ...prev,
+                      coverImg: info.secure_url,
+                    }));
+                  }
+                }
               }}
-              onError={(error) => {
-                toast({
-                  title: "Error",
-                  description: "Failed to upload image. Please try again.",
-                  variant: "destructive",
-                });
-                console.error("Upload failed: ", error);
+              options={{
+                sources: ["local"],
+                multiple: false,
               }}
             >
               {({ open }) => {
@@ -303,26 +305,25 @@ const EventCreationForm: React.FC = () => {
           <div className="flex items-center space-x-2">
             <CldUploadWidget
               uploadPreset="atomicity"
-              resource_type="image"
-              
-              onSuccess={({ event, info }) => {
-                setEventData((prev) => ({
-                  ...prev,
-                  detailImg: info["secure_url"],
-                }));
+              onSuccess={(result: any) => {
+                if (result.event === "success") {
+                  const info = result.info;
+                  if (info && "secure_url" in info) {
+                    setEventData((prev) => ({
+                      ...prev,
+                      detailImg: info.secure_url,
+                    }));
+                  }
+                }
               }}
-              onError={(error) => {
-                toast({
-                  title: "Error",
-                  description: "Failed to upload image. Please try again.",
-                  variant: "destructive",
-                });
-                console.error("Upload failed: ", error);
+              options={{
+                sources: ["local"],
+                multiple: false,
               }}
             >
               {({ open }) => {
                 return (
-                  <button onClick={() => open()}>Upload a Detail Image</button>
+                  <button onClick={() => open()}>Upload a detail Image</button>
                 );
               }}
             </CldUploadWidget>
@@ -331,20 +332,20 @@ const EventCreationForm: React.FC = () => {
           <div className="flex items-center space-x-2">
             <CldUploadWidget
               uploadPreset="atomicity"
-              resource_type="raw"
-              onSuccess={({ event, info }) => {
-                setEventData((prev) => ({
-                  ...prev,
-                  supportFile: info["secure_url"],
-                }));
+              onSuccess={(result: any) => {
+                if (result.event === "success") {
+                  const info = result.info;
+                  if (info && "secure_url" in info) {
+                    setEventData((prev) => ({
+                      ...prev,
+                      supportFile: info.secure_url,
+                    }));
+                  }
+                }
               }}
-              onError={(error) => {
-                toast({
-                  title: "Error",
-                  description: "Failed to upload image. Please try again.",
-                  variant: "destructive",
-                });
-                console.error("Upload failed: ", error);
+              options={{
+                sources: ["local"],
+                multiple: false,
               }}
             >
               {({ open }) => {
