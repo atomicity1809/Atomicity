@@ -252,7 +252,9 @@ const EventPage: React.FC = () => {
         const eventTitle = event.title || "Default Event Title";
         const eventTime=event.time.toString();
         const eventLocation=event.location;
-
+        const eventImg=event.coverImg;
+        const eventOrgName="Rare Society of Cultural Events";
+        const current_date=new Date().toString();
         // const confirmationNumber = 
 
         // Prepare user data object
@@ -263,7 +265,7 @@ const EventPage: React.FC = () => {
 
         console.log("test",userData,eventTitle);
         try {
-            await sendConfMail({ user: userData, event,eventDate,eventTime,eventLocation , confirmationNumber });
+            await sendConfMail({ user: userData, event,eventDate,eventTime,eventLocation , confirmationNumber,eventImg,eventOrgName,current_date });
             console.log('Confirmation email sent');
             toast.success("Ticket Sent to Mail !!");
         } catch (error) {

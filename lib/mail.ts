@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import * as handlebars from 'handlebars';
 import { confTicket } from './template/confTicket';
+import { confTicketNew } from './template/confTicketNew';
 
 export async function sendMail({
     to,
@@ -44,8 +45,8 @@ export async function sendMail({
     }
 }
 
-export function compileConfTicket(user_name:string, event_title:string, confirmation_number:string, event_date:string, event_time:string, event_location:string ) {
-    const template=handlebars.compile(confTicket);
+export function compileConfTicket(user_name:string, event_title:string, confirmation_number:string, event_date:string, event_time:string, event_location:string ,event_coverimg:string, event_organiser:string, current_date:string ) {
+    const template=handlebars.compile(confTicketNew);
     const htmlBody=template({
         user_name:user_name,
         event_title:event_title,
@@ -53,6 +54,9 @@ export function compileConfTicket(user_name:string, event_title:string, confirma
         event_date:event_date,
         event_time:event_time,
         event_location:event_location,
+        event_coverimg:event_coverimg,
+        event_organiser:event_organiser,
+        current_date:current_date,
     })
     return htmlBody;
 }

@@ -2,7 +2,7 @@
 
 import { compileConfTicket, sendMail } from "@/lib/mail";
 
-export async function sendConfMail({ user, event, eventDate, eventTime, eventLocation, confirmationNumber }: { user: any; event: any; eventDate: string; eventTime: string; eventLocation: string ; confirmationNumber: string }) {
+export async function sendConfMail({ user, event, eventDate, eventTime, eventLocation, confirmationNumber,eventImg , eventOrgName , current_date }: { user: any; event: any; eventDate: string; eventTime: string; eventLocation: string ; confirmationNumber: string ; eventImg : string ; eventOrgName : string ; current_date : string }) {
     const userMail = user?.emailAddresses[0]?.emailAddress || "default@example.com";
     const userName = user?.fullName || "Default Name";
     const eventTitle = event?.title || "Default Event Title";
@@ -21,6 +21,9 @@ export async function sendConfMail({ user, event, eventDate, eventTime, eventLoc
             `${eventDate}`,
             `${eventTime}`,
             `${eventLocation}`,
+            `${eventImg}`,
+            `${eventOrgName}`,
+            `${current_date}`
         ), // Pass HTML content here
     });
 }
