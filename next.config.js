@@ -12,7 +12,7 @@ const nextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
         port: "",
-        pathname: "/dfbriktiw/image/upload/**", // Correct Cloudinary path pattern
+        pathname: "/**", // Correct Cloudinary path pattern
       },
 
       // {
