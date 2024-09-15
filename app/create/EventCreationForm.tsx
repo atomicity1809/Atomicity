@@ -18,7 +18,6 @@ import { ArrowLeft, Calendar as CalendarIcon, InfoIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 import { CldUploadWidget } from "next-cloudinary";
 import { toast } from "sonner";
 
