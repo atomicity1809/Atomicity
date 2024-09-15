@@ -250,6 +250,9 @@ const EventPage: React.FC = () => {
         const userMail = user?.emailAddresses[0]?.emailAddress || "default@example.com";
         const userName = user?.fullName || "Default Name";
         const eventTitle = event.title || "Default Event Title";
+        const eventTime=event.time.toString();
+        const eventLocation=event.location;
+
         // const confirmationNumber = 
 
         // Prepare user data object
@@ -260,7 +263,7 @@ const EventPage: React.FC = () => {
 
         console.log("test",userData,eventTitle);
         try {
-            await sendConfMail({ user: userData, event , confirmationNumber });
+            await sendConfMail({ user: userData, event,eventDate,eventTime,eventLocation , confirmationNumber });
             console.log('Confirmation email sent');
             toast.success("Ticket Sent to Mail !!");
         } catch (error) {
