@@ -12,15 +12,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
         port: "",
-        pathname: "/**", // Correct Cloudinary path pattern
+        pathname: "/**",
       },
-
-      // {
-      //   protocol: "https",
-      //   hostname: "plus.unsplash.com", // Add this hostname
-      //   port: "",
-      //   pathname: "/**",
-      // },
+      {
+        protocol: "https",
+        hostname: "cloud.appwrite.io",
+        port: "",
+        pathname: "/v1/storage/buckets/*/files/*/view",
+      },
     ],
   },
 };
