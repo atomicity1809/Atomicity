@@ -458,11 +458,12 @@ const EventsPage: React.FC = () => {
                   <Home className="mr-2 h-4 w-4" />Home
                 </Button>
               </Link>
-              <Link href={'/create'}>
+              {/* CREATE BUTTON DISABLED FROM HERE */}
+              {/* <Link href={'/create'}>
                 <Button>
                   <PlusCircle className="mr-2 h-4 w-4" />Create Event
                 </Button>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>
