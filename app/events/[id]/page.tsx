@@ -88,6 +88,7 @@ const event: Event = {
   time: "7:00 PM Onwards",
   fees: 200,
   maxAllowedParticipants: 1500,
+  noMaxParticipants: false,
   coverImg:
     "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   detailImg: "/imgs/img5.jpg",
