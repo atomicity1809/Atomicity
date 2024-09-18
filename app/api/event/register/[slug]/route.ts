@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     // Add userId to the event's registeredUsers array
     if (!event.registeredUsers?.includes(userId)) {
       event.registeredUsers.push(userId);
-      event.noOfParticipants += 1;
+      event.maxAllowedParticipants += 1;
       // Save the updated event
       await event.save();
     }

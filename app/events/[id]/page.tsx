@@ -66,7 +66,8 @@ interface Event {
   location: string;
   time: string;
   fees: number;
-  noOfParticipants: number;
+  maxAllowedParticipants: number;
+  noMaxParticipants: boolean;
   coverImg: string;
   detailImg: string;
   supportFile: string;
@@ -86,7 +87,7 @@ const event: Event = {
   location: "Dome Ground, Nirma University, Ahmedabad",
   time: "7:00 PM Onwards",
   fees: 200,
-  noOfParticipants: 1500,
+  maxAllowedParticipants: 1500,
   coverImg:
     "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   detailImg: "/imgs/img5.jpg",
@@ -506,7 +507,7 @@ const EventPage: React.FC = () => {
                         </div>
                         <div className="flex items-center">
                           <UserIcon className="h-5 w-5 mr-2 text-purple-600" />
-                          <span>Capacity: {event.noOfParticipants}</span>
+                          <span>Capacity: {event.maxAllowedParticipants}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -601,7 +602,7 @@ const EventPage: React.FC = () => {
                     </Button>
 
                     <div className="text-center text-sm text-gray-500">
-                      {event.noOfParticipants} people are attending
+                      {event.maxAllowedParticipants} people are attending
                     </div>
                   </div>
                 </CardContent>
@@ -627,7 +628,7 @@ const EventPage: React.FC = () => {
                         <span>Attendees</span>
                       </div>
                       <span className="font-bold">
-                        {event.noOfParticipants}
+                        {event.registeredUsers.length}
                       </span>
                     </div>
                   </div>

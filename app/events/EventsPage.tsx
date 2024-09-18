@@ -55,7 +55,8 @@ interface Event {
   location: string;
   time: string;
   fees: number;
-  noOfParticipants: number;
+  maxAllowedParticipants: number;
+  noMaxParticipants: boolean;
   coverImg: string;
   isAvailableToReg: boolean;
   clubName: string;
@@ -129,7 +130,7 @@ const EventCard: React.FC<{ event: Event }> = ({ event }): JSX.Element => {
             </span>
             <span className="flex items-center text-sm text-muted-foreground">
               <UserIcon className="w-4 h-4 mr-1" />
-              {event.noOfParticipants}
+              {event.maxAllowedParticipants}
             </span>
           </div>
           {event.isAvailableToReg ? (

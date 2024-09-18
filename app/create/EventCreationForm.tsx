@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +18,7 @@ import { ArrowLeft, Calendar as CalendarIcon, InfoIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-// import { uploadToCloudinary } from "@/lib/cloudinary";
-import { CldUploadWidget, CloudinaryUploadWidgetInfo } from "next-cloudinary";
-
-import { toast } from "sonner";
+import { Client, Storage, ID } from "appwrite";
 
 interface EventData {
   title: string;
@@ -31,7 +28,8 @@ interface EventData {
   location: string;
   time: string;
   fees: number;
-  noOfParticipants: number;
+  maxAllowedParticipants: number;
+  noMaxParticipants: boolean;
   coverImg: string;
   detailImg: string;
   supportFile: string;
@@ -40,11 +38,22 @@ interface EventData {
 }
 
 const OWNER_ID = "66c6d9bba15522307994e4bc";
+const PROJECT_ID = '66e82a130039a555701b';
+const BUCKET_ID = '66e82bad0006fa424b7e';
+
+// Initialize Appwrite client
+const client = new Client()
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject(PROJECT_ID);
+
+const storage = new Storage(client);
+
 
 const EventCreationForm: React.FC = () => {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  // const OWNER_ID = "66c6d9bba15522307994e4bc";
 
   const [eventData, setEventData] = useState<EventData>({
     title: "",
@@ -54,7 +63,8 @@ const EventCreationForm: React.FC = () => {
     location: "",
     time: "",
     fees: 0,
-    noOfParticipants: 0,
+    maxAllowedParticipants: 0,
+    noMaxParticipants: false,
     coverImg: "",
     detailImg: "",
     supportFile: "",
@@ -72,6 +82,17 @@ const EventCreationForm: React.FC = () => {
     }));
   };
 
+  const handleMaxParticipantsCheckbox = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const checked = e.target.checked;
+    setEventData((prev) => ({
+      ...prev,
+      noMaxParticipants: checked,
+      maxAllowedParticipants: checked ? -1 : 0,
+    }));
+  };
+
   const handleSwitchChange = (name: string) => (checked: boolean) => {
     setEventData((prev) => ({ ...prev, [name]: checked }));
   };
@@ -82,13 +103,28 @@ const EventCreationForm: React.FC = () => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target;
-    if (files && files[0]) {
-      setEventData((prev) => ({
-        ...prev,
-        [name]: files[0],
-      }));
+  const handleFileUpload = async (
+    e: ChangeEvent<HTMLInputElement>,
+    field: string
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const response = await storage.createFile(BUCKET_ID, ID.unique(), file);
+        const fileUrl = storage.getFileView(BUCKET_ID, response.$id).href;
+        setEventData((prev) => ({ ...prev, [field]: fileUrl }));
+        toast({
+          title: "File Uploaded",
+          description: `${field} has been successfully uploaded.`,
+        });
+      } catch (error) {
+        console.error(`Error uploading ${field}:, error`);
+        toast({
+          title: "Upload Error",
+          description: `Failed to upload ${field}. Please try again.`,
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -97,33 +133,11 @@ const EventCreationForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // const coverImgUrl = eventData.coverImgFile
-      //   ? await uploadToCloudinary(eventData.coverImgFile, "events")
-      //   : "";
-      // const detailImgUrl = eventData.detailImgFile
-      //   ? await uploadToCloudinary(eventData.detailImgFile, "events")
-      //   : "";
-      // const supportFileUrl = eventData.supportFile
-      //   ? await uploadToCloudinary(eventData.supportFile, "events")
-      //   : "";
-
       const eventDataWithOwner = {
         ...eventData,
         owner: OWNER_ID,
-        // coverImg: coverImgUrl,
-        // detailImg: detailImgUrl,
-        // supportFile: supportFileUrl,
-        date: eventData.date.toISOString(), // Convert Date to ISO string for MongoDB
+        date: eventData.date.toISOString(),
       };
-
-      // if (!(coverImgUrl && detailImgUrl && supportFileUrl)) {
-      //   toast({
-      //     title: "Error",
-      //     description: "Failed to upload image. Please try again.",
-      //     variant: "destructive",
-      //   });
-      //   return;
-      // }
 
       const response = await fetch("/api/event", {
         method: "POST",
@@ -135,6 +149,7 @@ const EventCreationForm: React.FC = () => {
 
       if (!response.ok) {
         throw new Error("Failed to create event");
+        toast.error("Failed to create Event...");
       }
 
       const result = await response.json();
@@ -160,7 +175,7 @@ const EventCreationForm: React.FC = () => {
   return (
     <div className="grid md:grid-cols-2 gap-6 p-6">
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className=" flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Link href={"/events"}>
             <ArrowLeft />
           </Link>
@@ -253,109 +268,62 @@ const EventCreationForm: React.FC = () => {
             />
           </div>
           <div>
-            <Label htmlFor="noOfParticipants">Number of Participants</Label>
+            <Label htmlFor="maxParticipants">
+              Maximum Allowed Participants
+            </Label>
             <Input
-              id="noOfParticipants"
-              name="noOfParticipants"
+              id="maxAllowedParticipantsOf"
+              name="maxAllowedParticipants"
               type="number"
-              value={eventData.noOfParticipants}
+              value={
+                eventData.noMaxParticipants === true
+                  ? ""
+                  : eventData.maxAllowedParticipants
+              }
               onChange={handleInputChange}
+              disabled={eventData.noMaxParticipants}
+              placeholder={eventData.noMaxParticipants ? "No limit" : ""}
             />
           </div>
-          {/* <div>
-            <Label htmlFor="coverImg">Cover Image URL</Label>
-            <Input id="coverImg" name="coverImg" value={eventData.coverImg} placeholder="https://images.unsplash.com/photo" onChange={handleInputChange} />
-          </div>
-          <div>
-            <Label htmlFor="detailImg">Detail Image URL</Label>
-            <Input id="detailImg" name="detailImg" value={eventData.detailImg} onChange={handleInputChange} />
-          </div>
-          <div>
-            <Label htmlFor="supportFile">Support File URL</Label>
-            <Input id="supportFile" name="supportFile" value={eventData.supportFile} onChange={handleInputChange} />
-          </div> */}
-          {/* cover image */}
           <div className="flex items-center space-x-2">
-            <CldUploadWidget
-              uploadPreset="atomicity"
-              onSuccess={(result: any) => {
-                if (result.event === "success") {
-                  const info = result.info;
-                  if (info && "secure_url" in info) {
-                    setEventData((prev) => ({
-                      ...prev,
-                      coverImg: info.secure_url,
-                    }));
-                  }
-                }
-              }}
-              options={{
-                sources: ["local"],
-                multiple: false,
-              }}
-            >
-              {({ open }) => {
-                return (
-                  <button onClick={() => open()}>Upload a Cover Image</button>
-                );
-              }}
-            </CldUploadWidget>
-          </div>
-          {/* detail image */}
-          <div className="flex items-center space-x-2">
-            <CldUploadWidget
-              uploadPreset="atomicity"
-              onSuccess={(result: any) => {
-                if (result.event === "success") {
-                  const info = result.info;
-                  if (info && "secure_url" in info) {
-                    setEventData((prev) => ({
-                      ...prev,
-                      detailImg: info.secure_url,
-                    }));
-                  }
-                }
-              }}
-              options={{
-                sources: ["local"],
-                multiple: false,
-              }}
-            >
-              {({ open }) => {
-                return (
-                  <button onClick={() => open()}>Upload a detail Image</button>
-                );
-              }}
-            </CldUploadWidget>
-          </div>
-          {/* Support file */}
-          <div className="flex items-center space-x-2">
-            <CldUploadWidget
-              uploadPreset="atomicity"
-              onSuccess={(result: any) => {
-                if (result.event === "success") {
-                  const info = result.info;
-                  if (info && "secure_url" in info) {
-                    setEventData((prev) => ({
-                      ...prev,
-                      supportFile: info.secure_url,
-                    }));
-                  }
-                }
-              }}
-              options={{
-                sources: ["local"],
-                multiple: false,
-              }}
-            >
-              {({ open }) => {
-                return (
-                  <button onClick={() => open()}>Upload a Support File</button>
-                );
-              }}
-            </CldUploadWidget>
+            <input
+              id="noMaxParticipants"
+              type="checkbox"
+              checked={eventData.noMaxParticipants}
+              onChange={handleMaxParticipantsCheckbox}
+            />
+            <Label htmlFor="noMaxParticipants">No maximum participation</Label>
           </div>
 
+          <div>
+            <Label htmlFor="coverImg">Cover Image</Label>
+            <Input
+              id="coverImg"
+              name="coverImg"
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileUpload(e, "coverImg")}
+            />
+          </div>
+          <div>
+            <Label htmlFor="detailImg">Detail Image</Label>
+            <Input
+              id="detailImg"
+              name="detailImg"
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileUpload(e, "detailImg")}
+            />
+          </div>
+          <div>
+            <Label htmlFor="supportFile">Support File</Label>
+            <Input
+              id="supportFile"
+              name="supportFile"
+              type="file"
+              onChange={(e) => handleFileUpload(e, "supportFile")}
+            />
+          </div>
           <div className="flex items-center space-x-2">
             <Switch
               id="visibility"
@@ -381,7 +349,7 @@ const EventCreationForm: React.FC = () => {
       {/* PREVIEW SECTION */}
       <div className="space-y-6">
         <h2 className="text-2xl font-bold">Event Preview</h2>
-        <p className=" flex justify-center gap-2 items-center text-xs">
+        <p className="flex justify-center gap-2 items-center text-xs">
           <InfoIcon size={15} />
           Your changes reflect here.
         </p>
@@ -410,7 +378,12 @@ const EventCreationForm: React.FC = () => {
             <p>{eventData.location || "Event Location"}</p>
             <div className="flex justify-between">
               <span>Fees: ₹{eventData.fees}</span>
-              <span>Participants: {eventData.noOfParticipants}</span>
+              <span>
+                Maximum Participants:{" "}
+                {eventData.noMaxParticipants
+                  ? "N/A"
+                  : `${eventData.maxAllowedParticipants}`}
+              </span>
             </div>
             <div className="flex space-x-2">
               {eventData.visibility && (

@@ -21,7 +21,8 @@ export async function GET(req:NextRequest) {
 
     try {
         const events = await Event.find({});
-        console.log(events);
+        // console.log(events);
+        console.log("all events fetched ---------------------------------------------")
         return NextResponse.json({ success: true, data: events }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });

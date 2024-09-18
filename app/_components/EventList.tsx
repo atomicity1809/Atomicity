@@ -14,7 +14,8 @@ interface Event {
   location: string;
   time: string;
   fees: number;
-  noOfParticipants: number;
+  maxAllowedParticipants: number;
+  noMaxParticipants: boolean;
   coverImg: string;
   isAvailableToReg: boolean;
   clubName: string;
@@ -85,7 +86,7 @@ const EventList: React.FC = () => {
                 </div>
                 <div className="flex items-center mb-4">
                   <UsersIcon className="h-5 w-5 text-purple-600 mr-2" />
-                  <p className="text-gray-600">{event.noOfParticipants} participants</p>
+                  <p className="text-gray-600">{event.maxAllowedParticipants} participants</p>
                 </div>
                 <p className="text-gray-700 mb-4">{event.description}</p>
                 <button 

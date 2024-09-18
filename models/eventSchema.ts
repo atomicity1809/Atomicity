@@ -8,7 +8,8 @@ interface IEvent extends Document {
   location: string;
   time: string;
   fees: number;
-  noOfParticipants: number;
+  maxAllowedParticipants: number;
+  noMaxParticipants: boolean;
   coverImg: string;
   detailImg: string;
   supportFile: string;
@@ -26,7 +27,8 @@ const eventSchema: Schema<IEvent> = new Schema({
   location: { type: String, required: true },
   time: { type: String, required: true },
   fees: { type: Number, required: true },
-  noOfParticipants: { type: Number, required: true },
+  maxAllowedParticipants: { type: Number, required: function() { return !this.noMaxParticipants; }, default: null },
+  noMaxParticipants: { type: Boolean},
   coverImg: { type: String, required: true },
   detailImg: { type: String, required: true },
   supportFile: { type: String, required: true },
