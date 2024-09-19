@@ -341,7 +341,7 @@ export const confTicketNew =`
 							Show this QR Code to mark your presence.
 						</p>
 						<img 
-							src="https://api.qrserver.com/v1/create-qr-code/?size=84x84&data=RAR-c267-240913-UL93-93203" 
+							src="https://api.qrserver.com/v1/create-qr-code/?size=84x84&data={{confirmation_number}}" 
 							style="display: block; margin: 0 auto; border: 1px solid #ddd; width: 84px; height: 84px;"
 							alt="QR Code">
 					</div>
