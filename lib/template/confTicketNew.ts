@@ -336,6 +336,15 @@ export const confTicketNew =`
 							</tr>
 						</tbody>
 					</table>
+					<div style="text-align: center; padding: 20px;">
+						<p style="font-size: 16px; color: #333; margin-bottom: 15px;">
+							Show this QR Code to mark your presence.
+						</p>
+						<img 
+							src="https://api.qrserver.com/v1/create-qr-code/?size=84x84&data=RAR-c267-240913-UL93-93203" 
+							style="display: block; margin: 0 auto; border: 1px solid #ddd; width: 84px; height: 84px;"
+							alt="QR Code">
+					</div>
 					<table class="row row-6" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff;">
 						<tbody>
 							<tr>
