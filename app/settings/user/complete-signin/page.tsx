@@ -2,15 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs"; // Fetch Clerk user details
+import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MoveRight } from "lucide-react";
+import { MoveRight, MoveLeft } from "lucide-react";
 import Event from "@/models/eventSchema";
 import Admin from "@/models/adminSchema";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const clubCategories = [
   { value: "popular", label: "Popular" },
@@ -20,6 +21,16 @@ const clubCategories = [
   { value: "academic", label: "Academic" },
   { value: "social", label: "Social" },
   { value: "professional", label: "Professional" },
+  { value: "entrepreneurship", label: "Entrepreneurship" },
+  { value: "literary", label: "Literary" },
+  { value: "music", label: "Music" },
+  { value: "art", label: "Art" },
+  { value: "communityService", label: "Community Service" },
+  { value: "environmental", label: "Environmental" },
+  { value: "gaming", label: "Gaming" },
+  { value: "wellness", label: "Wellness" },
+  { value: "media", label: "Media" },
+  { value: "debate", label: "Debate" }
 ];
 
 interface IUser {
@@ -36,11 +47,15 @@ interface IUser {
   memberOfClubs: (typeof Admin)[];
 }
 
-const CompleteSignIn = () => {
+const StepWiseSignUpForm = () => {
   const { user } = useUser();
   const router = useRouter();
 
-  // State to store form details
+  const [step, setStep] = useState(1);
+  const [finalClick,setFinalClick]=useState(false);
+  const handleFinalClick = () =>{
+    setFinalClick(true);
+  }
   const [formData, setFormData] = useState<IUser>({
     name: "",
     email: "",
@@ -55,207 +70,231 @@ const CompleteSignIn = () => {
     memberOfClubs: [],
   });
 
-  // UseEffect to update formData once the user data is available
+  const [isStepValid, setIsStepValid] = useState(false);
+
   useEffect(() => {
     if (user) {
-      setFormData({
-        name: "",
+      setFormData((prevData) => ({
+        ...prevData,
         email: user?.emailAddresses[0]?.emailAddress || "",
         username: user?.username || "",
         clerkId: user?.id || "",
-        mobileNo: "",
-        institute: "",
-        interestedCategories: [],
-        certificates: [],
-        registeredEvents: [],
-        pastEvents: [],
-        memberOfClubs: [],
-      });
+      }));
     }
   }, [user]);
 
-  // Handle form change
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  useEffect(() => {
+    validateStep();
+  }, [formData, step]);
+
+  const validateStep = () => {
+    switch (step) {
+      case 1:
+        setIsStepValid(!!formData.name);
+        break;
+      case 2:
+        setIsStepValid(!!formData.mobileNo && !!formData.institute);
+        break;
+      case 3:
+        setIsStepValid(formData.interestedCategories.length > 0);
+        break;
+      default:
+        setIsStepValid(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (e.target.checked) {
-      setFormData({
-        ...formData,
-        interestedCategories: [...formData.interestedCategories, value],
-      });
-    } else {
-      setFormData({
-        ...formData,
-        interestedCategories: formData.interestedCategories.filter(
-          (category) => category !== value
-        ),
-      });
-    }
-  };
-
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Only submit the form if we are on the final step (step === 3)
+    if (step == 3 && formData.interestedCategories.length<=0 && finalClick==false) return;
+    console.log("line 118: ",step,formData.interestedCategories.length,finalClick);
     console.log("User Data:", formData);
     try {
-      const url = `/api/user`;
-
-      const response = await fetch(url, {
+      const response = await fetch("/api/user", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-      if (response.status) {
-        console.log("Registration successful:", data);
+      if (response.ok) {
+        console.log("Registration successful");
+        toast.success("Registration Successful !!");
+        router.push("/events");
       } else {
-        console.error("Registration failed:");
+        console.error("Registration failed");
       }
     } catch (error) {
-      console.error("An error occurred during registration dp :", error);
+      console.error("An error occurred during registration:", error);
     }
+  };
 
-    // Redirect to events page after submission
-    router.push("/events");
+  const toggleInterest = (value: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      interestedCategories: prevData.interestedCategories.includes(value)
+        ? prevData.interestedCategories.filter((category) => category !== value)
+        : [...prevData.interestedCategories, value],
+    }));
+  };
+
+  const nextStep = () => {
+    if (isStepValid && step < 3) {
+      setStep(step + 1);
+    }
+  };
+
+  const prevStep = () => setStep(step - 1);
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <>
+            <h2 className="text-2xl font-bold mb-4">Personal Information</h2>
+            <div className="grid gap-4">
+              <div className="grid gap-1">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="grid gap-1">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  readOnly
+                  disabled
+                />
+              </div>
+              <div className="grid gap-1">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  readOnly
+                  disabled
+                />
+              </div>
+            </div>
+          </>
+        );
+      case 2:
+        return (
+          <>
+            <h2 className="text-2xl font-bold mb-4">Contact Details</h2>
+            <div className="grid gap-4">
+              <div className="grid gap-1">
+                <Label htmlFor="mobileNo">Mobile Number</Label>
+                <Input
+                  id="mobileNo"
+                  name="mobileNo"
+                  value={formData.mobileNo}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="grid gap-1">
+                <Label htmlFor="institute">Institute</Label>
+                <select
+                  id="institute"
+                  name="institute"
+                  value={formData.institute}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border rounded-md"
+                  required
+                >
+                  <option value="">Select Institute</option>
+                  <option value="itnu">ITNU</option>
+                  <option value="imnu">IMNU</option>
+                  <option value="ipnu">IPNU</option>
+                  <option value="ianu">IANU</option>
+                </select>
+              </div>
+            </div>
+          </>
+        );
+      case 3:
+        return (
+          <>
+            <h2 className="text-2xl font-bold mb-4">Your Interests</h2>
+            <div className="space-y-4">
+              <div className="flex flex-wrap -m-1">
+                {clubCategories.map((category) => (
+                  <Badge
+                    key={category.value}
+                    variant={formData.interestedCategories.includes(category.value) ? "default" : "outline"}
+                    className={`cursor-pointer transition-all duration-200 ease-in-out ${
+                      formData.interestedCategories.includes(category.value)
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "bg-background text-foreground hover:bg-primary/10"
+                    } m-1 px-3 py-1 text-sm font-medium`}
+                    onClick={() => toggleInterest(category.value)}
+                  >
+                    {category.label}
+                  </Badge>
+                ))}
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Selected: {formData.interestedCategories.length} / {clubCategories.length}
+              </p>
+            </div>
+          </>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="w-full lg:grid lg:min-h-[300px] lg:grid-cols-2 xl:min-h-[300px]">
-      {/* Left Column with the SignIn Form */}
+    <div className="w-full ml-auto mr-auto">
       <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[350px] gap-6">
-          <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold">Complete Sign In</h1>
-            <p className="text-muted-foreground">
-              Fill in the details to proceed.
+        <div className="mx-auto w-[350px]">
+          <div className="grid gap-2">
+            <p className="text-xl font-light flex items-center justify-center bg-purple-200 ml-auto mr-auto p-1 border-[1px] border-purple-500 rounded-xl">
+              Atomi<span className=" font-bold">City</span>
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="grid gap-4">
-            {/* Name Field */}
-            <div className="grid gap-1">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="mt-1 block w-full"
-              />
+          <form onSubmit={handleSubmit} className="mt-5">
+            {renderStep()}
+            <div className="flex justify-between mt-6">
+              {step > 1 && (
+                <Button variant="secondary" type="button" onClick={prevStep}>
+                  <MoveLeft className="mr-2 h-4 w-4" /> Previous
+                </Button>
+              )}
+              {step < 3 ? (
+                <Button variant="secondary" type="button" onClick={nextStep} disabled={!isStepValid}>
+                  Next <MoveRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button variant="secondary" type="submit" disabled={!isStepValid} onClick={handleFinalClick}>
+                  Complete
+                </Button>
+              )}
             </div>
-
-            {/* Email Field */}
-            <div className="grid gap-1">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                readOnly
-                className="mt-1 block w-full"
-              />
-            </div>
-
-            {/* Username Field */}
-            <div className="grid gap-1">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                readOnly
-                className="mt-1 block w-full"
-              />
-            </div>
-
-            {/* Mobile Number Field */}
-            <div className="grid gap-1">
-              <Label htmlFor="mobileNo">Mobile Number</Label>
-              <Input
-                id="mobileNo"
-                name="mobileNo"
-                value={formData.mobileNo}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full"
-              />
-            </div>
-
-            {/* Institute Select Field */}
-            <div className="grid gap-1">
-              <Label htmlFor="institute">Institute</Label>
-              <select
-                id="institute"
-                name="institute"
-                value={formData.institute}
-                onChange={handleChange}
-                className="mt-1 block w-full"
-              >
-                <option value="itnu">ITNU</option>
-                <option value="imnu">IMNU</option>
-                <option value="ipnu">IPNU</option>
-                <option value="ianu">IANU</option>
-              </select>
-            </div>
-
-            {/* Interested Categories (Checkboxes) */}
-            <div className="grid gap-1">
-              <Label>Interested Categories</Label>
-              {clubCategories.map((category) => (
-                <div key={category.value} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={category.value}
-                    name="interestedCategories"
-                    value={category.value}
-                    checked={formData.interestedCategories.includes(
-                      category.value
-                    )}
-                    onChange={handleCategoryChange}
-                    className="mr-2"
-                  />
-                  <label htmlFor={category.value}>{category.label}</label>
-                </div>
-              ))}
-            </div>
-
-            {/* Proceed Button */}
-            <Button type="submit" className="flex w-full mt-3 items-center">
-              Proceed
-              <MoveRight className="ml-2" />
-            </Button>
           </form>
         </div>
-      </div>
-
-      {/* Right Column with the Image */}
-      <div className="hidden bg-muted lg:block">
-        <span className="absolute text-white font-light text-9xl top-[40%] ml-5">
-          Atomi<span className=" font-bold">City</span>
-        </span>
-        <Image
-          src="/imgs/img5.jpg" // Path to your image
-          alt="Cover Image"
-          width="1920"
-          height="1080"
-          className="h-full w-full object-cover"
-        />
       </div>
     </div>
   );
 };
 
-export default CompleteSignIn;
+export default StepWiseSignUpForm;
