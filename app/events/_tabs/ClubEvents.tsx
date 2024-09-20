@@ -14,14 +14,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Updated club data
 const clubs = [
-  { id: 1, shortName: "CSI", fullName: "Computer Society of India", logo: "/logos/csi.jpg", description: "Fostering the science of Computer Engineering and promoting professional development." },
-  { id: 2, shortName: "ECO", fullName: "Electronics and Communication Students Organisation", logo: "/logos/eco.png", description: "Advancing knowledge in electronics and communication engineering." },
-  { id: 3, shortName: "ISTE", fullName: "Indian Society for Technical Education", logo: "/logos/iste.jpg", description: "Promoting technical education and fostering students' professional development." },
-  { id: 4, shortName: "MESA", fullName: "Mechanical Engineering Students Association", logo: "/logos/mesa.png", description: "Uniting mechanical engineering students and promoting industry interaction." },
-  { id: 5, shortName: "NUMAISH", fullName: "Numaish (Music Band)", logo: "/logos/numaish.jpg", description: "Campus music band showcasing student talents and entertaining the community." },
-  { id: 6, shortName: "ORCES", fullName: "Organization of Civil Engineering Students", logo: "/logos/orces.png", description: "Bringing together civil engineering students and promoting practical learning." },
-  { id: 7, shortName: "ROBOTECH", fullName: "Robotech", logo: "/logos/robotech.png", description: "Exploring robotics and automation technologies through hands-on projects." },
-  { id: 8, shortName: "EESA", fullName: "Electrical Engineering Students Association", logo: "/logos/eesa.jpg", description: "Promoting electrical engineering knowledge and industry connections." },
+  { id: 1, shortName: "RARE", fullName: "Rare And Rare Enterprises", logo: "/logos/rare.jpg", description: "The only organisation where true potential of yours is rare-a-sized." },
+  { id: 2, shortName: "ASPRV", fullName: "પાર્થ કયે તો લાખુ ને", logo: "/logos/asprv.png", description: "વર્ણન જાણવા કૃપા કરીને પાર્થ ઠક્કરનો સંપર્ક કરો. તમે તેને પ્રથમ હોસ્ટેલમાં શોધી શકો છો." },
+  { id: 3, shortName: "CSI", fullName: "Computer Society of India", logo: "/logos/csi.jpg", description: "Fostering the science of Computer Engineering and promoting professional development." },
+  { id: 4, shortName: "ECO", fullName: "Electronics and Communication Students Organisation", logo: "/logos/eco.png", description: "Advancing knowledge in electronics and communication engineering." },
+  { id: 5, shortName: "ISTE", fullName: "Indian Society for Technical Education", logo: "/logos/iste.jpg", description: "Promoting technical education and fostering students' professional development." },
+  { id: 6, shortName: "MESA", fullName: "Mechanical Engineering Students Association", logo: "/logos/mesa.png", description: "Uniting mechanical engineering students and promoting industry interaction." },
+  { id: 7, shortName: "NUMAISH", fullName: "Numaish (Music Band)", logo: "/logos/numaish.jpg", description: "Campus music band showcasing student talents and entertaining the community." },
+  { id: 8, shortName: "ORCES", fullName: "Organization of Civil Engineering Students", logo: "/logos/orces.png", description: "Bringing together civil engineering students and promoting practical learning." },
+  { id: 9, shortName: "ROBOTECH", fullName: "Robotech", logo: "/logos/robotech.png", description: "Exploring robotics and automation technologies through hands-on projects." },
+  { id: 10, shortName: "EESA", fullName: "Electrical Engineering Students Association", logo: "/logos/eesa.jpg", description: "Promoting electrical engineering knowledge and industry connections." },
 ];
 
 const ClubCard = ({ club }: { club: any }) => (
