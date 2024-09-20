@@ -425,45 +425,59 @@ const EventPage: React.FC = () => {
 
           {/* Top Section with Image and Main Details */}
           <div className="relative mb-8" ref={coverImageRef}>
-            <Image
-              src={event.coverImg}
-              alt={event.title}
-              width={1200}
-              height={600}
-              className="w-full h-[600px] object-cover rounded-lg shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-75 rounded-lg" />
-            <Link href="/events">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute top-4 left-4 bg-white/50 hover:bg-white/75 text-black"
-              >
-                <ArrowLeftIcon className="h-5 w-5 mr-2" />
-                Back to Events
-              </Button>
-            </Link>
-            <div className="absolute bottom-8 left-8 right-8">
-              <h1 className="text-white text-6xl font-bold mb-2">
-                {event.title}
-              </h1>
-              <p className="text-white text-2xl mb-4">{event.subtitle}</p>
-              <div className="flex items-center space-x-4 text-white">
-                <div className="flex items-center">
-                  <CalendarIcon className="h-5 w-5 mr-2" />
-                  <span>{new Date(event.date).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center">
-                  <ClockIcon className="h-5 w-5 mr-2" />
-                  <span>{event.time}</span>
-                </div>
-                <div className="flex items-center">
-                  <MapPinIcon className="h-5 w-5 mr-2" />
-                  <span>{event.location}</span>
-                </div>
-              </div>
-            </div>
+      <Image
+        src={event.coverImg}
+        alt={event.title}
+        width={1200}
+        height={600}
+        className="w-full h-[600px] object-cover rounded-lg shadow-lg"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-75 rounded-lg" />
+      <Link href="/events">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-4 left-4 bg-white/50 hover:bg-white/75 text-black"
+        >
+          <ArrowLeftIcon className="h-5 w-5 mr-2" />
+          Back to Events
+        </Button>
+      </Link>
+      <div className="absolute bottom-8 left-8 right-8">
+        <h1 className="text-white text-6xl font-bold mb-2">
+          {event.title}
+        </h1>
+        <p className="text-white text-2xl mb-4">{event.subtitle}</p>
+        <div className="flex items-center space-x-4 text-white">
+          <div className="flex items-center">
+            <CalendarIcon className="h-5 w-5 mr-2" />
+            <span>{new Date(event.date).toLocaleDateString()}</span>
           </div>
+          <div className="flex items-center">
+            <ClockIcon className="h-5 w-5 mr-2" />
+            <span>{event.time}</span>
+          </div>
+          <div className="flex items-center">
+            <MapPinIcon className="h-5 w-5 mr-2" />
+            <span>{event.location}</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Brand logo and platform name */}
+      <div className="absolute bottom-4 right-4 flex items-center bg-white px-3 py-2 rounded-full">
+        <Image
+          src="/imgs/atomicity_logo.png" // Replace with your actual logo path
+          alt="Atomcity Logo"
+          width={24}
+          height={24}
+          className="mr-1 mt-1"
+        />
+        <span className=" text-black text-sm font-semibold">
+          Powered by Atomicity
+        </span>
+      </div>
+    </div>
 
           {/* Main Content */}
           <div className="grid grid-cols-3 gap-8">
