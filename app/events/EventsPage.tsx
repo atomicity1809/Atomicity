@@ -45,6 +45,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
+import ClubEvents from "./_tabs/ClubEvents";
+import CalendarEvents from "./_tabs/CalendarEvents";
 
 interface Event {
   _id: string;
@@ -184,6 +186,8 @@ const EventsPage: React.FC = () => {
   const [selectedInstitutes, setSelectedInstitutes] = useState<string[]>([]);
   const { isSignedIn, user } = useUser();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("events");
+  // const [events, setEvents] = useState([]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -284,6 +288,36 @@ const EventsPage: React.FC = () => {
     );
   };
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "events":
+        return (
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="flex ml-5 text-3xl font-semibold">
+              {selectedCategories.join(", ")}
+            </div>
+            <ScrollArea className="flex-1 px-4 pb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredEvents.map((event) => (
+                  <EventCard key={event._id} event={event} />
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        );
+      case "clubs":
+        return (
+          <ClubEvents/>
+        );
+      case "calendar":
+        return (
+          <CalendarEvents events={events} />
+        );
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen bg-background">
@@ -323,6 +357,7 @@ const EventsPage: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-background">
+      
       {/* Sidebar */}
       <div
         className="w-64 border-r p-4 overflow-y-auto"
@@ -435,11 +470,11 @@ const EventsPage: React.FC = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-center">
-            <Tabs defaultValue="events">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
                 <TabsTrigger value="events">Events</TabsTrigger>
-                <TabsTrigger value="clubs">Clubs</TabsTrigger>
                 <TabsTrigger value="calendar">Calendar</TabsTrigger>
+                <TabsTrigger value="clubs">Clubs</TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="flex items-center space-x-2">
@@ -468,7 +503,8 @@ const EventsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex ml-5 text-3xl font-semibold">
+        {renderTabContent()}
+        {/* <div className="flex ml-5 text-3xl font-semibold">
           {selectedCategories}
         </div>
         <ScrollArea className="flex-1 px-4 pb-6">
@@ -477,7 +513,7 @@ const EventsPage: React.FC = () => {
               <EventCard key={event._id} event={event} />
             ))}
           </div>
-        </ScrollArea>
+        </ScrollArea> */}
       </div>
     </div>
   );
