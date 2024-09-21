@@ -56,6 +56,10 @@ import { toast } from "sonner";
 import EventPageSkeleton from "./EventPageSkeleton";
 import { sendMail } from "@/lib/mail";
 import { sendConfMail } from "../sendConfMail";
+import ReactMarkdown from 'react-markdown';
+import dynamic from 'next/dynamic';
+
+const MDPreview = dynamic(() => import('@uiw/react-md-editor').then((mod) => mod.default.Markdown), { ssr: false });
 
 interface Event {
   [key: string]: any;
@@ -76,15 +80,22 @@ interface Event {
   isAvailableToReg: boolean;
   views: number;
   recentRegistrations: { name: string; avatar: string }[];
+  tags: string[]; // New field
+  categories: string[]; // New field
+  likeCounter: number; // New field
+  links: string[]; // New field
+  registrationOpenTill: string; // New field
+  additionalInfo: string; // New field
 }
+
 
 const event: Event = {
   _id: "66d0165246303cad142ea872",
-  title: "",
+  title: "Garba Night Extravaganza",
   subtitle: "Garba Night",
   description:
     "Join us for a night of traditional Garba dancing and festivities!",
-  date: "2024-15-09T00:00:00.000Z",
+  date: "2024-09-15T00:00:00.000Z", // Corrected date format (YYYY-MM-DD)
   location: "Dome Ground, Nirma University, Ahmedabad",
   time: "7:00 PM Onwards",
   fees: 200,
@@ -104,7 +115,17 @@ const event: Event = {
     { name: "Bob Brown", avatar: "https://github.com/shadcn.png" },
     { name: "Charlie Davis", avatar: "https://github.com/shadcn.png" },
   ],
+  tags: ["Garba", "Dance", "Festivity"], // New field
+  categories: ["Cultural", "Traditional", "Music"], // New field
+  likeCounter: 1023, // New field
+  links: [
+    "https://example.com/register",
+    "https://example.com/schedule",
+  ], // New field
+  registrationOpenTill: "2024-09-10T00:00:00.000Z", // New field
+  additionalInfo: "Please wear traditional attire and bring a water bottle.", // New field
 };
+
 
 const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
   const [copied, setCopied] = useState(false);
@@ -564,7 +585,32 @@ const EventPage: React.FC = () => {
                   <CardTitle>Additional Information</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* MARKDOWN TEXT TO BE INSERTED HERE */}
+                  <MDPreview source={event.additionalInfo} />
+                </CardContent>
+              </Card>
+
+              {/* support files */}
+              <Card className="mt-8">
+                <CardHeader>
+                  <CardTitle>
+                    Additional Files
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">
+                        Rules and Guidelines
+                      </h3>
+                      <a
+                        href={event.supportFile}
+                        className="flex items-center text-blue-600 hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <DownloadIcon className="h-5 w-5 mr-2" />
+                        Download Rules and Guidelines
+                      </a>
+                    </div>
                 </CardContent>
               </Card>
             </div>
@@ -593,7 +639,6 @@ const EventPage: React.FC = () => {
                     >
                       {registerStatus}
                     </Button>
-
                     <div className="text-center text-sm text-gray-500">
                       {event.maxAllowedParticipants} people are attending
                     </div>
@@ -613,7 +658,7 @@ const EventPage: React.FC = () => {
                         <StarIcon className="h-5 w-5 mr-2 text-purple-600" />
                         <span>Interested by</span>
                       </div>
-                      <span className="font-bold">{event.views}</span>
+                      <span className="font-bold">{event.likeCounter}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
@@ -628,26 +673,78 @@ const EventPage: React.FC = () => {
                 </CardContent>
               </Card>
 
-              {/* Recent Registrations */}
-              {/* --------------------removed for now [TEMPORARILY]------------ */}
-              {/* <Card>
+              {/* Event Links Section */}
+              <Card>
                 <CardHeader>
-                  <CardTitle>Recent Registrations</CardTitle>
+                  <CardTitle>Useful Links</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap -space-x-4">
-                    {event.recentRegistrations.map((user, index) => (
-                      <Avatar
-                        key={index}
-                        className="h-10 w-10 border-2 border-white rounded-full"
-                      >
-                        <AvatarImage src={user.avatar} alt={user.name} />
-                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    ))}
+                  <div className="space-y-2">
+                    {event.links.length > 0 ? (
+                      event.links.map((link, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <a
+                            href={link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-purple-600 hover:underline"
+                          >
+                            {link}
+                          </a>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No additional links available.</p>
+                    )}
                   </div>
                 </CardContent>
-              </Card> */}
+              </Card>
+
+              {/* Tags Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tags</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {event.tags.length > 0 ? (
+                      event.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="bg-purple-100 text-purple-600 px-2 py-1 rounded-full text-sm"
+                        >
+                          #{tag}
+                        </span>
+                      ))
+                    ) : (
+                      <p>No tags available.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Categories Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Categories</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {event.categories.length > 0 ? (
+                      event.categories.map((category, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm"
+                        >
+                          {category}
+                        </span>
+                      ))
+                    ) : (
+                      <p>No categories available.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Share and Favorite */}
               <div className="flex space-x-4">
@@ -667,6 +764,8 @@ const EventPage: React.FC = () => {
                   I am interested
                 </Button>
               </div>
+            {/* </div> */}
+
 
               {/* Drawer for Fancy Ticket Booking */}
               <Sheet open={isDrawerOpen} onOpenChange={handleCloseDrawer}>
