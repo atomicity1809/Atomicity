@@ -18,6 +18,7 @@ import {
   CheckIcon,
   CopyIcon,
   XIcon,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -337,7 +338,7 @@ const EventPage: React.FC = () => {
             setRegisterStatus("Already Registered");
           }
         } else {
-          setError("Failed to load events");
+          setError("Failed to load events. Please refresh this page.");
         }
       } catch (err) {
         setError((err as Error).message);
@@ -563,30 +564,7 @@ const EventPage: React.FC = () => {
                   <CardTitle>Additional Information</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span>Dress Code</span>
-                      <Badge>Traditional Garba Attire</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Age Restriction</span>
-                      <Badge variant="outline">All Ages Welcome</Badge>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">
-                        Rules and Guidelines
-                      </h3>
-                      <a
-                        href={event.supportFile}
-                        className="flex items-center text-blue-600 hover:underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <DownloadIcon className="h-5 w-5 mr-2" />
-                        Download Rules and Guidelines
-                      </a>
-                    </div>
-                  </div>
+                  {/* MARKDOWN TEXT TO BE INSERTED HERE */}
                 </CardContent>
               </Card>
             </div>
@@ -632,8 +610,8 @@ const EventPage: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <EyeIcon className="h-5 w-5 mr-2 text-purple-600" />
-                        <span>Views</span>
+                        <StarIcon className="h-5 w-5 mr-2 text-purple-600" />
+                        <span>Interested by</span>
                       </div>
                       <span className="font-bold">{event.views}</span>
                     </div>
@@ -651,7 +629,8 @@ const EventPage: React.FC = () => {
               </Card>
 
               {/* Recent Registrations */}
-              <Card>
+              {/* --------------------removed for now [TEMPORARILY]------------ */}
+              {/* <Card>
                 <CardHeader>
                   <CardTitle>Recent Registrations</CardTitle>
                 </CardHeader>
@@ -668,7 +647,7 @@ const EventPage: React.FC = () => {
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               {/* Share and Favorite */}
               <div className="flex space-x-4">
@@ -684,8 +663,8 @@ const EventPage: React.FC = () => {
                   </PopoverContent>
                 </Popover>
                 <Button variant="outline" className="flex-1">
-                  <HeartIcon className="h-5 w-5 mr-2" />
-                  Favorite
+                  <StarIcon className="h-5 w-5 mr-2" />
+                  I am interested
                 </Button>
               </div>
 
