@@ -16,7 +16,7 @@ interface IEvent extends Document {
   visibility: boolean;
   isAvailableToReg: boolean;
   registeredUsers: string[]; 
-  owner: mongoose.Types.ObjectId;
+  ownerId: string;
   tags: string[]; // New field
   categories: string[]; // New field
   likeCounter: number; // New field
@@ -41,7 +41,7 @@ const eventSchema: Schema<IEvent> = new Schema({
   visibility: { type: Boolean, required: true },
   isAvailableToReg: { type: Boolean, required: true },
   registeredUsers: [{ type: String }],
-  owner: { type: Schema.Types.ObjectId, ref: 'Admin', required: true },
+  ownerId: { type:String,required: true },
   tags: [{ type: String }], // New field
   categories: [{ type: String }], // New field
   likeCounter: { type: Number, default: 0 }, // New field

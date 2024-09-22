@@ -59,7 +59,7 @@ const Navbar = () => {
         <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <Link href="#" legacyBehavior passHref>
+              <Link href="/events" legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   Events
                 </NavigationMenuLink>
@@ -73,7 +73,7 @@ const Navbar = () => {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="#" legacyBehavior passHref>
+              <Link href="/about" legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   About
                 </NavigationMenuLink>

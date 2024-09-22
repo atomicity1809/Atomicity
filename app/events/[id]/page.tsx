@@ -19,6 +19,10 @@ import {
   CopyIcon,
   XIcon,
   Heart,
+  CreditCardIcon,
+  LoaderIcon,
+  MailIcon,
+  CheckCircleIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,6 +62,7 @@ import { sendMail } from "@/lib/mail";
 import { sendConfMail } from "../sendConfMail";
 import ReactMarkdown from 'react-markdown';
 import dynamic from 'next/dynamic';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const MDPreview = dynamic(() => import('@uiw/react-md-editor').then((mod) => mod.default.Markdown), { ssr: false });
 
@@ -86,6 +91,7 @@ interface Event {
   links: string[]; // New field
   registrationOpenTill: string; // New field
   additionalInfo: string; // New field
+  ownerId:string;
 }
 
 
@@ -124,6 +130,7 @@ const event: Event = {
   ], // New field
   registrationOpenTill: "2024-09-10T00:00:00.000Z", // New field
   additionalInfo: "Please wear traditional attire and bring a water bottle.", // New field
+  ownerId:"123"
 };
 
 
@@ -195,8 +202,10 @@ const EventPage: React.FC = () => {
   const [registerStatus, setRegisterStatus] = useState("Register Now");
   const coverImageRef = useRef<HTMLDivElement>(null);
   const { isSignedIn, user, isLoaded } = useUser();
-
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
+  const [registrationState, setRegistrationState] = useState<'initial' | 'registering' | 'sending_email' | 'success'>('initial');
+
   useEffect(() => {
     const handleScroll = () => {
       if (coverImageRef.current) {
@@ -212,6 +221,11 @@ const EventPage: React.FC = () => {
 
   const handleRegister = () => {
     setIsDrawerOpen(true);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
   };
 
   const handleCloseDrawer = () => {
@@ -226,6 +240,7 @@ const EventPage: React.FC = () => {
       return;
     }
     bang_setLoading(true);
+    setRegistrationState('registering');
 
     try {
       const url = `/api/event/register/${eventId}`;
@@ -273,6 +288,7 @@ const EventPage: React.FC = () => {
       if (response.status == 200) {
         console.log("Registration successful:", data);
         toast.success("Registration successful");
+        setRegistrationState('sending_email');
 
         const userMail =
           user?.emailAddresses[0]?.emailAddress || "default@example.com";
@@ -304,12 +320,16 @@ const EventPage: React.FC = () => {
             current_date,
           });
           console.log("Confirmation email sent");
-          toast.success("Ticket Sent to Mail !!");
+          // toast.success("Ticket Sent to Mail !!");
+          setRegistrationState('success');
+          toast.success("Ticket sent to your email!");
         } catch (error) {
           console.error("Error sending email:", error);
+          toast.error("Failed to send ticket email. Please contact support.");
+          setRegistrationState('initial');
         }
 
-        router.push("/events");
+        // router.push("/events");
       } else if (
         response.status == 404 ||
         response.status == 406 ||
@@ -319,6 +339,8 @@ const EventPage: React.FC = () => {
       } else {
         console.error("Registration failed:");
         toast.error("Registration failed:");
+        setIsDialogOpen(false);
+        setRegistrationState('initial');
       }
     } catch (error) {
       console.error("An error occurred during registration:", error);
@@ -328,6 +350,75 @@ const EventPage: React.FC = () => {
     }
   };
 
+  const handleCloseAndRefresh = () => {
+    setIsDialogOpen(false);
+    setRegistrationState('initial');
+    router.push('/events');
+    // This will refresh the current page
+    // router.refresh();
+  };
+  const renderDialogContent = () => {
+    switch (registrationState) {
+      case 'initial':
+        return (
+          <>
+            <h3 className="text-xl font-semibold mb-4">{event.title}</h3>
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <CalendarIcon className="h-5 w-5 text-purple-500 mr-3" />
+                <span>{new Date(event.date).toLocaleDateString()}</span>
+              </div>
+              <div className="flex items-center">
+                <ClockIcon className="h-5 w-5 text-purple-500 mr-3" />
+                <span>{event.time}</span>
+              </div>
+              <div className="flex items-center">
+                <MapPinIcon className="h-5 w-5 text-purple-500 mr-3" />
+                <span>{event.location}</span>
+              </div>
+              <div className="flex items-center">
+                <CreditCardIcon className="h-5 w-5 text-purple-500 mr-3" />
+                <span>₹{event.fees}</span>
+              </div>
+            </div>
+            <Button
+              onClick={() => handleEventRegister(event._id)}
+              className="w-full mt-6 bg-purple-500 hover:bg-purple-600 text-white"
+            >
+              Confirm Booking
+            </Button>
+          </>
+        );
+      case 'registering':
+        return (
+          <div className="text-center py-8">
+            <LoaderIcon className="h-12 w-12 animate-spin text-purple-500 mx-auto mb-4" />
+            <p className="text-lg">Registering for the event...</p>
+          </div>
+        );
+      case 'sending_email':
+        return (
+          <div className="text-center py-8">
+            <MailIcon className="h-12 w-12 text-purple-500 mx-auto mb-4 animate-bounce" />
+            <p className="text-lg">Delivering your ticket via email...</p>
+          </div>
+        );
+      case 'success':
+        return (
+          <div className="text-center py-8">
+            <CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <p className="text-lg font-semibold mb-2">Registration Successful!</p>
+            <p>Your ticket has been sent to your email.</p>
+            <Button
+              onClick={handleCloseAndRefresh}
+              className="mt-6 bg-purple-500 hover:bg-purple-600 text-white"
+            >
+              Close
+            </Button>
+          </div>
+        );
+    }
+  };
   const [loading, setLoading] = useState<boolean>(true);
   const [bang_loading, bang_setLoading] = useState<boolean>(false);
 
@@ -768,59 +859,22 @@ const EventPage: React.FC = () => {
 
 
               {/* Drawer for Fancy Ticket Booking */}
-              <Sheet open={isDrawerOpen} onOpenChange={handleCloseDrawer}>
-                <SheetContent
-                  className="bg-white p-8 rounded-t-3xl items-center"
-                  side="bottom"
-                >
-                  <SheetHeader className="flex items-center justify-between">
-                    <SheetTitle className="mx-auto">
-                      Your Ticket Details
-                    </SheetTitle>
-                    <SheetClose
-                      onClick={handleCloseDrawer}
-                      className="cursor-pointer"
-                    />
-                  </SheetHeader>
-                  <div className="flex flex-col items-center p-2">
-                    <div className="flex items-center gap-4 mb-4 bg-white text-black p-6 rounded-lg border-[1px] border-black w-full text-center">
-                      <div>
-                        <Image
-                          src={event.coverImg}
-                          height={200}
-                          width={250}
-                          alt="cover img"
-                          className="rounded-lg max-h-[160px]"
-                        />
-                      </div>
-                      <div className="text-justify">
-                        <h2 className="text-2xl font-bold mb-2">
-                          {event.title}
-                        </h2>
-                        <p>
-                          {event.subtitle} |{" "}
-                          {new Date(event.date).toLocaleDateString()} |{" "}
-                          {new Date(event.date).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                        <p>{event.location}</p>
-                        <p className="mt-4">Ticket Price: ₹{event.fees}</p>
-                      </div>
-                    </div>
-                    <Button
-                      className="bg-purple-500 hover:bg-purple-800 w-full text-white py-3 text-lg"
-                      onClick={() => handleEventRegister(event._id)}
-                      disabled={bang_loading} // Disable button when loading
-                    >
-                      {bang_loading
-                        ? "Requesting your Ticket..."
-                        : "Bang On !!"}
-                    </Button>
+              <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) setRegistrationState('initial');
+              }}>
+                <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden">
+                  <DialogHeader className="bg-purple-500 text-white p-6">
+                    <DialogTitle className="text-2xl font-light">
+                      {registrationState === 'initial' ? 'Confirm Booking' : 'Registration Status'}
+                    </DialogTitle>
+                    <DialogClose />
+                  </DialogHeader>
+                  <div className="p-6">
+                    {renderDialogContent()}
                   </div>
-                </SheetContent>
-              </Sheet>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
