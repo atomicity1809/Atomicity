@@ -187,6 +187,7 @@ const EventsPage: React.FC = () => {
   const { isSignedIn, user } = useUser();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
+  const [isLoadingEvents, setIsLoadingEvents] = useState<boolean>(true);
   // const [events, setEvents] = useState([]);
 
   useEffect(() => {
@@ -203,7 +204,8 @@ const EventsPage: React.FC = () => {
       } catch (err) {
         setError((err as Error).message);
       } finally {
-        setLoading(false);
+        // setLoading(false);
+        setIsLoadingEvents(false);
       }
     };
 
@@ -297,11 +299,7 @@ const EventsPage: React.FC = () => {
               {selectedCategories.join(", ")}
             </div>
             <ScrollArea className="flex-1 px-4 pb-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredEvents.map((event) => (
-                  <EventCard key={event._id} event={event} />
-                ))}
-              </div>
+              {renderEventsList()}
             </ScrollArea>
           </div>
         );
@@ -318,36 +316,60 @@ const EventsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  const renderEventsList = () => {
+    if (isLoadingEvents) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, index) => (
+            <LoadingSkeleton key={index} />
+          ))}
+        </div>
+      );
+    }
+
+    if (error) {
+      return <div className="text-red-500">{error}</div>;
+    }
+
     return (
-      <div className="flex h-screen bg-background">
-        {/* Sidebar skeleton */}
-        <div className="w-64 border-r p-4">
-          <Skeleton className="h-8 w-32 mb-4" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-3/4 mb-2" />
-          <Skeleton className="h-4 w-1/2 mb-4" />
-          {/* Repeat for other sidebar items */}
-        </div>
-        
-        {/* Main content skeleton */}
-        <div className="flex-1 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <Skeleton className="h-10 w-64" />
-            <div className="flex space-x-2">
-              <Skeleton className="h-10 w-40" />
-              <Skeleton className="h-10 w-40" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, index) => (
-              <LoadingSkeleton key={index} />
-            ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredEvents.map((event) => (
+          <EventCard key={event._id} event={event} />
+        ))}
       </div>
     );
-  }
+  };
+
+  // if (loading) {
+  //   return (
+  //     <div className="flex h-screen bg-background">
+  //       {/* Sidebar skeleton */}
+  //       <div className="w-64 border-r p-4">
+  //         <Skeleton className="h-8 w-32 mb-4" />
+  //         <Skeleton className="h-4 w-full mb-2" />
+  //         <Skeleton className="h-4 w-3/4 mb-2" />
+  //         <Skeleton className="h-4 w-1/2 mb-4" />
+  //         {/* Repeat for other sidebar items */}
+  //       </div>
+        
+  //       {/* Main content skeleton */}
+  //       <div className="flex-1 p-6">
+  //         <div className="flex justify-between items-center mb-6">
+  //           <Skeleton className="h-10 w-64" />
+  //           <div className="flex space-x-2">
+  //             <Skeleton className="h-10 w-40" />
+  //             <Skeleton className="h-10 w-40" />
+  //           </div>
+  //         </div>
+  //         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  //           {[...Array(6)].map((_, index) => (
+  //             <LoadingSkeleton key={index} />
+  //           ))}
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (
@@ -489,31 +511,15 @@ const EventsPage: React.FC = () => {
                 />
               </div>
               <Link href={'/'}>
-                <Button variant="outline">
+                <Button>
                   <Home className="mr-2 h-4 w-4" />Home
                 </Button>
               </Link>
-              {/* CREATE BUTTON DISABLED FROM HERE */}
-              {/* <Link href={'/create'}>
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />Create Event
-                </Button>
-              </Link> */}
             </div>
           </div>
         </div>
 
         {renderTabContent()}
-        {/* <div className="flex ml-5 text-3xl font-semibold">
-          {selectedCategories}
-        </div>
-        <ScrollArea className="flex-1 px-4 pb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredEvents.map((event) => (
-              <EventCard key={event._id} event={event} />
-            ))}
-          </div>
-        </ScrollArea> */}
       </div>
     </div>
   );

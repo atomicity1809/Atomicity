@@ -825,6 +825,9 @@ const EventPage: React.FC = () => {
           </div>
         </div>
       )}
+      <hr className="border-[1px] border-purple-200 mt-2 mb-2"/>
+      <p className="flex justify-center text-xs text-gray-400 items-center">© Atomicity Events Inc. | All Rights Reserved | 2024-2025</p>
+      <hr className="border-[1px] border-purple-200 mt-2 mb-2"/>
     </>
   );
 };
