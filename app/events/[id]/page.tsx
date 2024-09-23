@@ -19,6 +19,10 @@ import {
   CopyIcon,
   XIcon,
   Heart,
+  CreditCardIcon,
+  LoaderIcon,
+  MailIcon,
+  CheckCircleIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,10 +60,22 @@ import { toast } from "sonner";
 import EventPageSkeleton from "./EventPageSkeleton";
 import { sendMail } from "@/lib/mail";
 import { sendConfMail } from "../sendConfMail";
-import ReactMarkdown from 'react-markdown';
-import dynamic from 'next/dynamic';
+import ReactMarkdown from "react-markdown";
+import dynamic from "next/dynamic";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import Admin from "@/models/adminSchema";
 
-const MDPreview = dynamic(() => import('@uiw/react-md-editor').then((mod) => mod.default.Markdown), { ssr: false });
+const MDPreview = dynamic(
+  () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
+  { ssr: false }
+);
 
 interface Event {
   [key: string]: any;
@@ -79,53 +95,48 @@ interface Event {
   visibility: boolean;
   isAvailableToReg: boolean;
   views: number;
-  recentRegistrations: { name: string; avatar: string }[];
   tags: string[]; // New field
   categories: string[]; // New field
   likeCounter: number; // New field
-  links: string[]; // New field
   registrationOpenTill: string; // New field
   additionalInfo: string; // New field
+  ownerId: string;
 }
 
+interface Organizer {
+  clubName: string;
+  logo: string;
+}
 
 const event: Event = {
-  _id: "66d0165246303cad142ea872",
-  title: "Garba Night Extravaganza",
-  subtitle: "Garba Night",
-  description:
-    "Join us for a night of traditional Garba dancing and festivities!",
-  date: "2024-09-15T00:00:00.000Z", // Corrected date format (YYYY-MM-DD)
-  location: "Dome Ground, Nirma University, Ahmedabad",
-  time: "7:00 PM Onwards",
-  fees: 200,
-  maxAllowedParticipants: 1500,
+  _id: "",
+  title: "",
+  subtitle: "",
+  description: "",
+  date: "",
+  location: "",
+  time: "",
+  fees: 0,
+  maxAllowedParticipants: 0,
   noMaxParticipants: false,
-  coverImg:
-    "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  detailImg: "/imgs/img5.jpg",
-  supportFile: "https://example.com/files/rules_and_guidelines.pdf",
+  coverImg: "",
+  detailImg: "",
+  supportFile: "",
   visibility: true,
   isAvailableToReg: true,
-  views: 4520,
-  recentRegistrations: [
-    { name: "John Doe", avatar: "https://github.com/shadcn.png" },
-    { name: "Jane Smith", avatar: "https://github.com/shadcn.png" },
-    { name: "Alice Johnson", avatar: "https://github.com/shadcn.png" },
-    { name: "Bob Brown", avatar: "https://github.com/shadcn.png" },
-    { name: "Charlie Davis", avatar: "https://github.com/shadcn.png" },
-  ],
-  tags: ["Garba", "Dance", "Festivity"], // New field
-  categories: ["Cultural", "Traditional", "Music"], // New field
-  likeCounter: 1023, // New field
-  links: [
-    "https://example.com/register",
-    "https://example.com/schedule",
-  ], // New field
-  registrationOpenTill: "2024-09-10T00:00:00.000Z", // New field
-  additionalInfo: "Please wear traditional attire and bring a water bottle.", // New field
+  views: 0,
+  tags: [], // New field
+  categories: [], // New field
+  likeCounter: 0, // New field
+  registrationOpenTill: "", // New field
+  additionalInfo: "", // New field
+  ownerId: "",
 };
 
+const organizer: Organizer = {
+  clubName: "",
+  logo: "",
+};
 
 const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
   const [copied, setCopied] = useState(false);
@@ -192,11 +203,16 @@ const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
 const EventPage: React.FC = () => {
   const [showTicketBanner, setShowTicketBanner] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [registerStatus, setRegisterStatus] = useState("Register Now");
+  const [registerStatus, setRegisterStatus] = useState(0);
   const coverImageRef = useRef<HTMLDivElement>(null);
   const { isSignedIn, user, isLoaded } = useUser();
-
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [organizerId, setOrganizerId] = useState("");
   const router = useRouter();
+  const [registrationState, setRegistrationState] = useState<
+    "initial" | "registering" | "sending_email" | "success"
+  >("initial");
+
   useEffect(() => {
     const handleScroll = () => {
       if (coverImageRef.current) {
@@ -212,6 +228,11 @@ const EventPage: React.FC = () => {
 
   const handleRegister = () => {
     setIsDrawerOpen(true);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
   };
 
   const handleCloseDrawer = () => {
@@ -226,6 +247,7 @@ const EventPage: React.FC = () => {
       return;
     }
     bang_setLoading(true);
+    setRegistrationState("registering");
 
     try {
       const url = `/api/event/register/${eventId}`;
@@ -273,6 +295,7 @@ const EventPage: React.FC = () => {
       if (response.status == 200) {
         console.log("Registration successful:", data);
         toast.success("Registration successful");
+        setRegistrationState("sending_email");
 
         const userMail =
           user?.emailAddresses[0]?.emailAddress || "default@example.com";
@@ -304,12 +327,16 @@ const EventPage: React.FC = () => {
             current_date,
           });
           console.log("Confirmation email sent");
-          toast.success("Ticket Sent to Mail !!");
+          // toast.success("Ticket Sent to Mail !!");
+          setRegistrationState("success");
+          toast.success("Ticket sent to your email!");
         } catch (error) {
           console.error("Error sending email:", error);
+          toast.error("Failed to send ticket email. Please contact support.");
+          setRegistrationState("initial");
         }
 
-        router.push("/events");
+        // router.push("/events");
       } else if (
         response.status == 404 ||
         response.status == 406 ||
@@ -319,6 +346,8 @@ const EventPage: React.FC = () => {
       } else {
         console.error("Registration failed:");
         toast.error("Registration failed:");
+        setIsDialogOpen(false);
+        setRegistrationState("initial");
       }
     } catch (error) {
       console.error("An error occurred during registration:", error);
@@ -328,10 +357,83 @@ const EventPage: React.FC = () => {
     }
   };
 
+  const handleCloseAndRefresh = () => {
+    setIsDialogOpen(false);
+    setRegistrationState("initial");
+    router.push("/events");
+    // This will refresh the current page
+    // router.refresh();
+  };
+  const renderDialogContent = () => {
+    switch (registrationState) {
+      case "initial":
+        return (
+          <>
+            <h3 className="text-xl font-semibold mb-4">{event.title}</h3>
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <CalendarIcon className="h-5 w-5 text-purple-500 mr-3" />
+                <span>{new Date(event.date).toLocaleDateString()}</span>
+              </div>
+              <div className="flex items-center">
+                <ClockIcon className="h-5 w-5 text-purple-500 mr-3" />
+                <span>{event.time}</span>
+              </div>
+              <div className="flex items-center">
+                <MapPinIcon className="h-5 w-5 text-purple-500 mr-3" />
+                <span>{event.location}</span>
+              </div>
+              <div className="flex items-center">
+                <CreditCardIcon className="h-5 w-5 text-purple-500 mr-3" />
+                <span>₹{event.fees}</span>
+              </div>
+            </div>
+            <Button
+              onClick={() => handleEventRegister(event._id)}
+              className="w-full mt-6 bg-purple-500 hover:bg-purple-600 text-white"
+            >
+              Confirm Booking
+            </Button>
+          </>
+        );
+      case "registering":
+        return (
+          <div className="text-center py-8">
+            <LoaderIcon className="h-12 w-12 animate-spin text-purple-500 mx-auto mb-4" />
+            <p className="text-lg">Registering for the event...</p>
+          </div>
+        );
+      case "sending_email":
+        return (
+          <div className="text-center py-8">
+            <MailIcon className="h-12 w-12 text-purple-500 mx-auto mb-4 animate-bounce" />
+            <p className="text-lg">Delivering your ticket via email...</p>
+          </div>
+        );
+      case "success":
+        return (
+          <div className="text-center py-8">
+            <CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <p className="text-lg font-semibold mb-2">
+              Registration Successful!
+            </p>
+            <p>Your ticket has been sent to your email.</p>
+            <Button
+              onClick={handleCloseAndRefresh}
+              className="mt-6 bg-purple-500 hover:bg-purple-600 text-white"
+            >
+              Close
+            </Button>
+          </div>
+        );
+    }
+  };
   const [loading, setLoading] = useState<boolean>(true);
-  const [bang_loading, bang_setLoading] = useState<boolean>(false);
-
   const [error, setError] = useState<string | null>(null);
+  const [orgLoading, setOrgLoading] = useState<boolean>(true);
+  const [orgError, setOrgError] = useState<string | null>(null);
+
+  const [bang_loading, bang_setLoading] = useState<boolean>(false);
 
   const pathname = usePathname();
   console.log(pathname);
@@ -352,11 +454,18 @@ const EventPage: React.FC = () => {
           Object.keys(fetchedEventData).forEach((key) => {
             event[key] = fetchedEventData[key];
           });
-          console.log("fetchEventData: ", fetchedEventData);
-          console.log(fetchedEventData["registeredUsers"].includes(userID));
+          setOrganizerId(fetchedEventData["ownerId"]);
+          // console.log("fetchEventData: ", fetchedEventData);
+          // console.log(fetchedEventData["registeredUsers"].includes(userID));
 
           if (fetchedEventData["registeredUsers"].includes(userID)) {
-            setRegisterStatus("Already Registered");
+            setRegisterStatus(1);
+          } else if (
+            fetchedEventData["noMaxParticipants"] == true &&
+            fetchedEventData["registeredUsers"].length >=
+              fetchedEventData["maxAllowedParticipants"]
+          ) {
+            setRegisterStatus(2);
           }
         } else {
           setError("Failed to load events. Please refresh this page.");
@@ -370,6 +479,34 @@ const EventPage: React.FC = () => {
 
     fetchEventData();
   }, []);
+
+  useEffect(() => {
+    const fetchOrganizerDetails = async () => {
+      try {
+        const response = await fetch(`/api/getorganizer/${organizerId}`);
+        const data = await response.json();
+
+        if (data.success) {
+          const fetchedOwnerData = data.data[0];
+          (Object.keys(organizer) as (keyof Organizer)[]).forEach((key) => {
+            // Check if the fetchedOwnerData has the same key
+            if (key in fetchedOwnerData) {
+              organizer[key] =
+                fetchedOwnerData[key as keyof typeof fetchedOwnerData];
+            }
+          });
+        } else {
+          setOrgError("Failed to load organizer details");
+        }
+      } catch (err) {
+        setOrgError((err as Error).message);
+      } finally {
+        setOrgLoading(false);
+      }
+    };
+
+    fetchOrganizerDetails();
+  }, [event.ownerId]);
 
   return (
     <>
@@ -430,16 +567,24 @@ const EventPage: React.FC = () => {
                     <ShareCard event={event} />
                   </PopoverContent>
                 </Popover>
+
+                {/* register button */}
                 <Button
                   className={`w-full ${
-                    registerStatus === "Already Registered"
-                      ? "bg-gray-500 cursor-not-allowed hover:cursor-crosshair"
+                    registerStatus === 1
+                      ? "bg-gray-500 cursor-not-allowed hover:cursor-not-allowed"
+                      : registerStatus === 2
+                      ? "bg-red-500 cursor-not-allowed hover:cursor-not-allowed"
                       : "bg-purple-500 hover:bg-purple-700"
                   }`}
                   onClick={handleRegister}
-                  disabled={registerStatus === "Already Registered"}
+                  disabled={registerStatus !== 0} // Disable when status is not 0 (registered or full)
                 >
-                  {registerStatus}
+                  {registerStatus === 0
+                    ? "Register"
+                    : registerStatus === 1
+                    ? "Registered"
+                    : "Registration Full"}
                 </Button>
               </div>
             </div>
@@ -447,59 +592,59 @@ const EventPage: React.FC = () => {
 
           {/* Top Section with Image and Main Details */}
           <div className="relative mb-8" ref={coverImageRef}>
-      <Image
-        src={event.coverImg}
-        alt={event.title}
-        width={1200}
-        height={600}
-        className="w-full h-[600px] object-cover rounded-lg shadow-lg"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-75 rounded-lg" />
-      <Link href="/events">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-4 left-4 bg-white/50 hover:bg-white/75 text-black"
-        >
-          <ArrowLeftIcon className="h-5 w-5 mr-2" />
-          Back to Events
-        </Button>
-      </Link>
-      <div className="absolute bottom-8 left-8 right-8">
-        <h1 className="text-white text-6xl font-bold mb-2">
-          {event.title}
-        </h1>
-        <p className="text-white text-2xl mb-4">{event.subtitle}</p>
-        <div className="flex items-center space-x-4 text-white">
-          <div className="flex items-center">
-            <CalendarIcon className="h-5 w-5 mr-2" />
-            <span>{new Date(event.date).toLocaleDateString()}</span>
+            <Image
+              src={event.coverImg}
+              alt={event.title}
+              width={1200}
+              height={600}
+              className="w-full h-[600px] object-cover rounded-lg shadow-lg"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-75 rounded-lg" />
+            <Link href="/events">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-4 left-4 bg-white/50 hover:bg-white/75 text-black"
+              >
+                <ArrowLeftIcon className="h-5 w-5 mr-2" />
+                Back to Events
+              </Button>
+            </Link>
+            <div className="absolute bottom-8 left-8 right-8">
+              <h1 className="text-white text-6xl font-bold mb-2">
+                {event.title}
+              </h1>
+              <p className="text-white text-2xl mb-4">{event.subtitle}</p>
+              <div className="flex items-center space-x-4 text-white">
+                <div className="flex items-center">
+                  <CalendarIcon className="h-5 w-5 mr-2" />
+                  <span>{new Date(event.date).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center">
+                  <ClockIcon className="h-5 w-5 mr-2" />
+                  <span>{event.time}</span>
+                </div>
+                <div className="flex items-center">
+                  <MapPinIcon className="h-5 w-5 mr-2" />
+                  <span>{event.location}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Brand logo and platform name */}
+            <div className="absolute bottom-4 right-4 flex items-center bg-white px-3 py-2 rounded-full">
+              <Image
+                src="/imgs/atomicity_logo.png" // Replace with your actual logo path
+                alt="Atomcity Logo"
+                width={24}
+                height={24}
+                className="mr-1 mt-1"
+              />
+              <span className=" text-black text-sm font-semibold">
+                Powered by Atomicity
+              </span>
+            </div>
           </div>
-          <div className="flex items-center">
-            <ClockIcon className="h-5 w-5 mr-2" />
-            <span>{event.time}</span>
-          </div>
-          <div className="flex items-center">
-            <MapPinIcon className="h-5 w-5 mr-2" />
-            <span>{event.location}</span>
-          </div>
-        </div>
-      </div>
-      
-      {/* Brand logo and platform name */}
-      <div className="absolute bottom-4 right-4 flex items-center bg-white px-3 py-2 rounded-full">
-        <Image
-          src="/imgs/atomicity_logo.png" // Replace with your actual logo path
-          alt="Atomcity Logo"
-          width={24}
-          height={24}
-          className="mr-1 mt-1"
-        />
-        <span className=" text-black text-sm font-semibold">
-          Powered by Atomicity
-        </span>
-      </div>
-    </div>
 
           {/* Main Content */}
           <div className="grid grid-cols-3 gap-8">
@@ -539,12 +684,25 @@ const EventPage: React.FC = () => {
                           <span>{event.time}</span>
                         </div>
                         <div className="flex items-center">
-                          <MapPinIcon className="h-5 w-5 mr-2 text-purple-600" />
-                          <span>{event.location}</span>
+                          <ClockIcon className="h-5 w-5 mr-2 text-purple-600" />
+                          <span>{event.mode}</span>
                         </div>
+
+                        {event.mode !== "online" && (
+                          <div className="flex items-center">
+                            <MapPinIcon className="h-5 w-5 mr-2 text-purple-600" />
+                            <span>{event.location}</span>
+                          </div>
+                        )}
                         <div className="flex items-center">
                           <UserIcon className="h-5 w-5 mr-2 text-purple-600" />
-                          <span>Capacity: {event.maxAllowedParticipants}</span>
+                          {/* Show "No Limit" if noMaxParticipants is true, else show maxAllowedParticipants */}
+                          <span>
+                            Capacity:{" "}
+                            {event.noMaxParticipants
+                              ? "No Limit"
+                              : event.maxAllowedParticipants}
+                          </span>
                         </div>
                       </div>
                     </CardContent>
@@ -558,22 +716,20 @@ const EventPage: React.FC = () => {
                     <CardContent>
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-16 w-16">
-                          <AvatarImage src="/imgs/logo.png" alt="Organizer" />
-                          <AvatarFallback>NU</AvatarFallback>
+                          <AvatarImage src={organizer?.logo} alt="Organizer" />
+                          {/* <AvatarFallback>NUok</AvatarFallback> */}
                         </Avatar>
                         <div>
-                          <h3 className="text-lg font-semibold">
-                            Rare Society of Cultural Events
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            Event Organizer
-                          </p>
+                          <a
+                            href={`https://atomicity.vercel.app/club/${organizerId}`}
+                            className="text-lg font-semibold text-blue-600 hover:underline"
+                            target="_blank" // Open in a new tab
+                            rel="noopener noreferrer" // Ensure security for new tab
+                          >
+                            {organizer?.clubName}
+                          </a>
                         </div>
                       </div>
-                      <p className="mt-4">
-                        Rare Society is committed to providing high-quality
-                        education and memorable experiences for students.
-                      </p>
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -592,25 +748,23 @@ const EventPage: React.FC = () => {
               {/* support files */}
               <Card className="mt-8">
                 <CardHeader>
-                  <CardTitle>
-                    Additional Files
-                  </CardTitle>
+                  <CardTitle>Additional Files</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">
-                        Rules and Guidelines
-                      </h3>
-                      <a
-                        href={event.supportFile}
-                        className="flex items-center text-blue-600 hover:underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <DownloadIcon className="h-5 w-5 mr-2" />
-                        Download Rules and Guidelines
-                      </a>
-                    </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Rules and Guidelines
+                    </h3>
+                    <a
+                      href={event.supportFile}
+                      className="flex items-center text-blue-600 hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <DownloadIcon className="h-5 w-5 mr-2" />
+                      Download Rules and Guidelines
+                    </a>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -630,18 +784,25 @@ const EventPage: React.FC = () => {
                     </div>
                     <Button
                       className={`w-full ${
-                        registerStatus === "Already Registered"
-                          ? "bg-gray-400 cursor-not-allowed hover:cursor-crosshair"
+                        registerStatus === 1
+                          ? "bg-gray-500 cursor-not-allowed hover:cursor-not-allowed"
+                          : registerStatus === 2
+                          ? "bg-red-500 cursor-not-allowed hover:cursor-not-allowed"
                           : "bg-purple-500 hover:bg-purple-700"
                       }`}
                       onClick={handleRegister}
-                      disabled={registerStatus === "Already Registered"}
+                      disabled={registerStatus !== 0} // Disable when status is not 0 (registered or full)
                     >
-                      {registerStatus}
+                      {registerStatus === 0
+                        ? "Register"
+                        : registerStatus === 1
+                        ? "Registered"
+                        : "Registration Full"}
                     </Button>
-                    <div className="text-center text-sm text-gray-500">
+
+                    {/* <div className="text-center text-sm text-gray-500">
                       {event.maxAllowedParticipants} people are attending
-                    </div>
+                    </div> */}
                   </div>
                 </CardContent>
               </Card>
@@ -663,10 +824,10 @@ const EventPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <UserIcon className="h-5 w-5 mr-2 text-purple-600" />
-                        <span>Attendees</span>
+                        <span>Registered</span>
                       </div>
                       <span className="font-bold">
-                        {event.registeredUsers.length}
+                        {event?.registeredUsers?.length}
                       </span>
                     </div>
                   </div>
@@ -674,7 +835,7 @@ const EventPage: React.FC = () => {
               </Card>
 
               {/* Event Links Section */}
-              <Card>
+              {/* <Card>
                 <CardHeader>
                   <CardTitle>Useful Links</CardTitle>
                 </CardHeader>
@@ -682,7 +843,10 @@ const EventPage: React.FC = () => {
                   <div className="space-y-2">
                     {event.links.length > 0 ? (
                       event.links.map((link, index) => (
-                        <div key={index} className="flex items-center space-x-2">
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2"
+                        >
                           <a
                             href={link}
                             target="_blank"
@@ -698,7 +862,7 @@ const EventPage: React.FC = () => {
                     )}
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               {/* Tags Section */}
               <Card>
@@ -760,74 +924,40 @@ const EventPage: React.FC = () => {
                   </PopoverContent>
                 </Popover>
                 <Button variant="outline" className="flex-1">
-                  <StarIcon className="h-5 w-5 mr-2" />
-                  I am interested
+                  <StarIcon className="h-5 w-5 mr-2" />I am interested
                 </Button>
               </div>
-            {/* </div> */}
-
+              {/* </div> */}
 
               {/* Drawer for Fancy Ticket Booking */}
-              <Sheet open={isDrawerOpen} onOpenChange={handleCloseDrawer}>
-                <SheetContent
-                  className="bg-white p-8 rounded-t-3xl items-center"
-                  side="bottom"
-                >
-                  <SheetHeader className="flex items-center justify-between">
-                    <SheetTitle className="mx-auto">
-                      Your Ticket Details
-                    </SheetTitle>
-                    <SheetClose
-                      onClick={handleCloseDrawer}
-                      className="cursor-pointer"
-                    />
-                  </SheetHeader>
-                  <div className="flex flex-col items-center p-2">
-                    <div className="flex items-center gap-4 mb-4 bg-white text-black p-6 rounded-lg border-[1px] border-black w-full text-center">
-                      <div>
-                        <Image
-                          src={event.coverImg}
-                          height={200}
-                          width={250}
-                          alt="cover img"
-                          className="rounded-lg max-h-[160px]"
-                        />
-                      </div>
-                      <div className="text-justify">
-                        <h2 className="text-2xl font-bold mb-2">
-                          {event.title}
-                        </h2>
-                        <p>
-                          {event.subtitle} |{" "}
-                          {new Date(event.date).toLocaleDateString()} |{" "}
-                          {new Date(event.date).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                        <p>{event.location}</p>
-                        <p className="mt-4">Ticket Price: ₹{event.fees}</p>
-                      </div>
-                    </div>
-                    <Button
-                      className="bg-purple-500 hover:bg-purple-800 w-full text-white py-3 text-lg"
-                      onClick={() => handleEventRegister(event._id)}
-                      disabled={bang_loading} // Disable button when loading
-                    >
-                      {bang_loading
-                        ? "Requesting your Ticket..."
-                        : "Bang On !!"}
-                    </Button>
-                  </div>
-                </SheetContent>
-              </Sheet>
+              <Dialog
+                open={isDialogOpen}
+                onOpenChange={(open) => {
+                  setIsDialogOpen(open);
+                  if (!open) setRegistrationState("initial");
+                }}
+              >
+                <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden">
+                  <DialogHeader className="bg-purple-500 text-white p-6">
+                    <DialogTitle className="text-2xl font-light">
+                      {registrationState === "initial"
+                        ? "Confirm Booking"
+                        : "Registration Status"}
+                    </DialogTitle>
+                    <DialogClose />
+                  </DialogHeader>
+                  <div className="p-6">{renderDialogContent()}</div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
       )}
-      <hr className="border-[1px] border-purple-200 mt-2 mb-2"/>
-      <p className="flex justify-center text-xs text-gray-400 items-center">© Atomicity Events Inc. | All Rights Reserved | 2024-2025</p>
-      <hr className="border-[1px] border-purple-200 mt-2 mb-2"/>
+      <hr className="border-[1px] border-purple-200 mt-2 mb-2" />
+      <p className="flex justify-center text-xs text-gray-400 items-center">
+        © Atomicity Events Inc. | All Rights Reserved | 2024-2025
+      </p>
+      <hr className="border-[1px] border-purple-200 mt-2 mb-2" />
     </>
   );
 };

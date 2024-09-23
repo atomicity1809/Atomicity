@@ -63,6 +63,7 @@ interface Event {
   isAvailableToReg: boolean;
   clubName: string;
   eventType: string;
+  registeredUsers: string[];
 }
 
 const clubCategories = [
@@ -127,12 +128,12 @@ const EventCard: React.FC<{ event: Event }> = ({ event }): JSX.Element => {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <span className="flex items-center text-sm text-muted-foreground">
-              <DollarSignIcon className="w-4 h-4 mr-1" />
-              ₹{event.fees}
+              {/* <DollarSignIcon className="w-4 h-4 mr-1" /> */}
+              {event.fees === 0 ? "Free" : `₹${event.fees}`}
             </span>
             <span className="flex items-center text-sm text-muted-foreground">
               <UserIcon className="w-4 h-4 mr-1" />
-              {event.maxAllowedParticipants}
+              {event.registeredUsers.length}
             </span>
           </div>
           {event.isAvailableToReg ? (
