@@ -1,10 +1,19 @@
+"use client"
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Calendar, Users, Zap } from 'lucide-react';
-import AdditionalFeatures from './AdditionalFeatures';
+import { useRouter } from 'next/navigation';
 
 const Hero: React.FC = () => {
+  const router = useRouter();
+
+  const handleExploreEvents = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    router.push('/events');
+  };
+
   return (
     <section id="home" className="bg-gradient-to-t from-purple-500 to-white py-20">
       <div className="container mx-auto text-center">
@@ -17,17 +26,13 @@ const Hero: React.FC = () => {
             Transform your ideas into extraordinary experiences with our cutting-edge event management platform.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            {/* <Button size="lg" className="bg-white text-purple-600 hover:bg-yellow-300 hover:text-purple-700 transition-colors duration-300">
-              <Link href='/events'>Explore Events</Link>
-            </Button> */}
-            <Button>
-              <Link href='/events'>Explore Events</Link>
-            </Button>
-            {/* <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-purple-600 transition-colors duration-300">
-              <Link href='/create'>Create Event</Link>
-            </Button> */}
+            <Link href="/events" onClick={handleExploreEvents} prefetch={true}>
+              <Button>
+                  Explore Events
+              </Button>
+            </Link>
             <Button variant="outline">
-              <Link href='/create'>Create Events</Link>
+              <Link href="/create">Create Events</Link>
             </Button>
           </div>
         </div>
