@@ -22,13 +22,12 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
-    // console.log(event);
+    console.log("Step 1 pass, got event data: ",event);
     // Initialize registeredUsers if undefined
     if (!event.registeredUsers) {
       event.registeredUsers = [];
     }
-    console.log("step1");
-
+    
     // Check if registration is closed
     if (!event.isAvailableToReg) {
       return NextResponse.json(
@@ -37,7 +36,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("step2");
+    console.log("step 2 pass, available to register: ");
 
     // Add userId to the event's registeredUsers array
     if (!event.registeredUsers?.includes(userId)) {
@@ -47,11 +46,9 @@ export async function POST(req: NextRequest) {
       await event.save();
     }
 
-    console.log("step3");
+    console.log("step3 pass, userId added to event registered users");
 
-    // Fetch the user by ID
-    console.log("line 56: ");
-
+    
     // const user = await User.findById(userId);
     const user = await User.findOne({ clerkId: userId });
 
@@ -62,7 +59,7 @@ export async function POST(req: NextRequest) {
         { status: 408 }
       );
     }
-    console.log("step4");
+    console.log("step4 passed user found");
 
     if (!user.registeredEvents) {
       user.registeredEvents = [];
@@ -73,6 +70,7 @@ export async function POST(req: NextRequest) {
       user.registeredEvents.push(eventId);
       await user.save();
     }
+    console.log("step 5 pass event id added to user registered events");
 
     return NextResponse.json(
       { success: true, message: "Successfully registered for the event" },
@@ -80,7 +78,7 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: (error as Error).message + "ok" },
+      { success: false, error: (error as Error).message },
       { status: 400 }
     );
   }
