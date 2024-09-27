@@ -516,28 +516,21 @@ const EventPage: React.FC = () => {
         <title>{event.title} | Atomicity</title>
         <meta name="description" content={event.subtitle} />
         
-        {/* Open Graph tags optimized for WhatsApp and other platforms */}
+        {/* Open Graph tags optimized for Facebook, WhatsApp, and other platforms */}
         <meta property="og:title" content={`${event.title} | Atomicity`} />
         <meta property="og:description" content={event.subtitle} />
         <meta property="og:url" content={`https://atomicity.vercel.app/events/${event._id}`} />
-        <meta property="og:image" content={event.coverImg || '/imgs/atomicity_logo.png'} />
+        <meta property="og:image" content={event.coverImg || 'https://atomicity.vercel.app/imgs/atomicity_logo.png'} />
+        <meta property="og:image:secure_url" content={event.coverImg || 'https://atomicity.vercel.app/imgs/atomicity_logo.png'} />
+        <meta property="og:image:type" content="image/jpeg" /> {/* Adjust if using a different image format */}
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={`Cover image for ${event.title}`} />
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Atomicity" />
+        <meta property="og:site_name" content="Atomicity Events" />
         <meta property="og:locale" content="en_US" />
 
-        {/* Additional tags for richer previews */}
-        <meta property="og:updated_time" content={event.updatedAt} />
-        <meta property="og:rich_attachment" content="true" />
-        <meta property="og:app_id" content="YOUR_FACEBOOK_APP_ID" /> {/* If you have a Facebook App ID */}
         
-        {/* Twitter Card tags for Twitter and some other platforms */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@YourTwitterHandle" />
-        <meta name="twitter:title" content={`${event.title} | Atomicity`} />
-        <meta name="twitter:description" content={event.subtitle} />
-        <meta name="twitter:image" content={event.coverImg || '/imgs/atomicity_logo.png'} />
       </Head>
 
 
