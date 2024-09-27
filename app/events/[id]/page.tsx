@@ -71,6 +71,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Admin from "@/models/adminSchema";
+import Head from "next/head";
 
 const MDPreview = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
@@ -510,6 +511,28 @@ const EventPage: React.FC = () => {
 
   return (
     <>
+      <Head>
+        {/* Open Graph tags for link preview */}
+        <title>{event.title} | Atomicity</title>
+        <meta name="description" content={event.subtitle} />
+        
+        <meta property="og:title" content={event.title} />
+        <meta property="og:description" content={event.subtitle} />
+        <meta property="og:url" content={`https://atomicity.vercel.app/events/${event.id}`} />
+        <meta property="og:image" content={event.image || 'default-image-url'} />
+        
+        {/* For WhatsApp and other previews */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Atomicity" />
+        <meta property="og:locale" content="en_US" />
+      </Head>
+
+
+
+
+
+
+
       {loading ? (
         <EventPageSkeleton />
       ) : error ? (
