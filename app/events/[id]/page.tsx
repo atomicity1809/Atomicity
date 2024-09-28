@@ -520,12 +520,6 @@ const EventPage: React.FC = () => {
         <meta property="og:title" content={`${event.title} | Atomicity`} />
         <meta property="og:description" content={event.subtitle} />
         <meta property="og:url" content={`https://atomicity.vercel.app/events/${event._id}`} />
-        <meta property="og:image" content={event.coverImg || 'https://atomicity.vercel.app/imgs/atomicity_logo.png'} />
-        <meta property="og:image:secure_url" content={event.coverImg || 'https://atomicity.vercel.app/imgs/atomicity_logo.png'} />
-        <meta property="og:image:type" content="image/jpeg" /> {/* Adjust if using a different image format */}
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={`Cover image for ${event.title}`} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Atomicity Events" />
         <meta property="og:locale" content="en_US" />
