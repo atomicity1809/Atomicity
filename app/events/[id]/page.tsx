@@ -742,16 +742,33 @@ const EventPage: React.FC = () => {
                           <AvatarImage src={organizer?.logo} alt="Organizer" />
                           {/* <AvatarFallback>NUok</AvatarFallback> */}
                         </Avatar>
-                        <div>
-                          <a
-                            href={`https://atomicity.vercel.app/club/${organizerId}`}
-                            className="text-lg font-semibold text-blue-600 hover:underline"
-                            target="_blank" // Open in a new tab
-                            rel="noopener noreferrer" // Ensure security for new tab
-                          >
-                            {organizer?.clubName}
-                          </a>
-                        </div>
+                        <div className="relative group">
+  <a
+    href={`/club/${organizerId}`}
+    className="text-lg font-semibold text-blue-600 hover:text-blue-800 transition-colors duration-300 flex items-center"
+    rel="noopener noreferrer"
+  >
+    {organizer?.clubName}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M17.25 8.25l4.5 4.5m0 0l-4.5 4.5m4.5-4.5H3"
+      />
+    </svg>
+  </a>
+  <span className="absolute left-0 mt-1 text-sm text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+    Visit Club Page
+  </span>
+</div>
+
                       </div>
                     </CardContent>
                   </Card>
