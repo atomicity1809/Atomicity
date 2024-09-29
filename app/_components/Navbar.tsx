@@ -54,11 +54,13 @@ const Navbar = () => {
       }`}
     >
       <CardContent className="flex justify-between items-center p-4">
-        <div className="logo">
-          <span className="text-2xl font-light">
-            Atomi<span className="font-bold">City</span>
-          </span>
-        </div>
+        <Link href={"/"}>
+          <div className="logo">
+            <span className="text-2xl font-light">
+              Atomi<span className="font-bold">City</span>
+            </span>
+          </div>
+        </Link>
 
         <NavigationMenu className="hidden md:flex ml-9">
           <NavigationMenuList>

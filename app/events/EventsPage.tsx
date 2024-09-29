@@ -137,7 +137,7 @@ const EventCard: React.FC<{ event: Event }> = ({ event }): JSX.Element => {
             </span>
           </div>
           {event.isAvailableToReg ? (
-            <Link href={`/events/${event._id}`}>
+            <Link href={`/events/${event._id}`} prefetch>
               <Button variant="outline" size="sm">
                 Book Now
               </Button>

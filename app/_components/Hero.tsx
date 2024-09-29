@@ -3,13 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
 
 const Hero: React.FC = () => {
-  const router = useRouter();
   const controls = useAnimation();
   const [ref, inView] = useInView({
     triggerOnce: true,
@@ -28,11 +26,6 @@ const Hero: React.FC = () => {
       controls.start('visible');
     }
   }, [controls, inView]);
-
-  const handleExploreEvents = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    router.push('/events');
-  };
 
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -95,7 +88,7 @@ const Hero: React.FC = () => {
             Find exciting experiences, meet new people, and create lasting memories with our event platform.
           </motion.p>
           <motion.div variants={itemVariants}>
-            <Link href="/events" onClick={handleExploreEvents} prefetch={true}>
+            <Link href="/events" passHref prefetch>
               <Button
                 size="lg"
                 className="text-xl px-10 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"

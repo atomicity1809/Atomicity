@@ -72,6 +72,7 @@ import {
 } from "@/components/ui/dialog";
 import Admin from "@/models/adminSchema";
 import Head from "next/head";
+import NotFound from "@/app/not-found";
 
 const MDPreview = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
@@ -448,6 +449,10 @@ const EventPage: React.FC = () => {
         const response = await fetch(`/api/event/${eventId}`);
         const data = await response.json();
         console.log("Data: ", data.data[0]);
+        console.log("rs",response.status);
+        if(response.status === 404 || response.status === 400){
+          notFound();
+        }
 
         if (data.success) {
           // setEventData(data.data[0]);
@@ -486,7 +491,8 @@ const EventPage: React.FC = () => {
       try {
         const response = await fetch(`/api/getorganizer/${organizerId}`);
         const data = await response.json();
-
+        
+        
         if (data.success) {
           const fetchedOwnerData = data.data[0];
           (Object.keys(organizer) as (keyof Organizer)[]).forEach((key) => {
@@ -537,7 +543,9 @@ const EventPage: React.FC = () => {
         <EventPageSkeleton />
       ) : error ? (
         <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-red-600">{error}</h1>
+          {/* <h1 className="text-2xl font-bold text-red-600">{error}</h1> */}
+          <NotFound/>
+          
         </div>
       ) : (
         <div className="container mx-auto px-4 py-8">

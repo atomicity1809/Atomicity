@@ -5,6 +5,7 @@ import "./globals.css";
 import Navbar from "./_components/Navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner"
+import Footer from "./_components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,7 +25,7 @@ export default function RootLayout({
         <ClerkProvider>
 
           {children}
-          
+          {/* <Footer/> */}
           <SpeedInsights/>
           <Toaster position="top-center" />
         </ClerkProvider>
