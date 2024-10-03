@@ -36,6 +36,7 @@ import {
   LogIn,
   CheckIcon,
   ChevronsUpDown,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -47,6 +48,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import ClubEvents from "./_tabs/ClubEvents";
 import CalendarEvents from "./_tabs/CalendarEvents";
+import Sidebar from "./Sidebar";
+import MainContent from "./MainContent";
 
 interface Event {
   _id: string;
@@ -189,7 +192,12 @@ const EventsPage: React.FC = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
   const [isLoadingEvents, setIsLoadingEvents] = useState<boolean>(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   // const [events, setEvents] = useState([]);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -372,156 +380,38 @@ const EventsPage: React.FC = () => {
   //   );
   // }
 
+
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen text-red-500">{error}</div>
     );
   }
 
+ 
+  
   return (
     <div className="flex h-screen bg-background">
       
       {/* Sidebar */}
-      <div
-        className="w-64 border-r p-4 overflow-y-auto"
-        style={{ height: "calc(100vh - 16px)" }}
-      >
-        <div className='logo flex items-center justify-between'>
-          <Link href={"/"}>
-            <span className='border-[1px] rounded-md border-purple-500 p-1 bg-purple-200'>
-              <span className='font-light text-sm'>Atomi</span>
-              <span className='font-bold text-sm'>City</span>
-            </span>
-          </Link>
-          <span className="flex items-center underline">
-            <UserMenu />
-          </span>
-        </div>
-        <hr className="my-2"/>
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-medium mb-2">Discover</h3>
-            <ul className="space-y-2">
-              <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <Clock className="mr-2 h-4 w-4" /> Upcoming Events
-                </Button>
-              </li>
-              <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <BarChart2 className="mr-2 h-4 w-4" /> Browse
-                </Button>
-              </li>
-              <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <Radio className="mr-2 h-4 w-4" /> Live Events
-                </Button>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-medium mb-2">My Events</h3>
-            <ul className="space-y-2">
-              <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <ListMusic className="mr-2 h-4 w-4" /> Registered
-                </Button>
-              </li>
-              <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <Music className="mr-2 h-4 w-4" /> Favorites
-                </Button>
-              </li>
-              <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <User className="mr-2 h-4 w-4" /> My Club Events
-                </Button>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-medium mb-2">Categories</h3>
-            <DropdownMenu open={isDropdownOpen} onOpenChange={setDropdownOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between" onClick={() => setDropdownOpen(!isDropdownOpen)}>
-                  Categories
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                {clubCategories.map((category) => (
-                  <DropdownMenuItem key={category.value} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`category-${category.value}`}
-                      checked={selectedCategories.includes(category.value)}
-                      onCheckedChange={() => handleCategoryChange(category.value)}
-                    />
-                    <label htmlFor={`category-${category.value}`}>{category.label}</label>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        
-          <div className="mt-4">
-            <h3 className="font-medium mb-2">Institute</h3>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  Institutes
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                {institutes.map((institute) => (
-                  <DropdownMenuItem key={institute.value} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`institute-${institute.value}`}
-                      checked={selectedInstitutes.includes(institute.value)}
-                      onCheckedChange={() => handleInstituteChange(institute.value)}
-                    />
-                    <label htmlFor={`institute-${institute.value}`}>{institute.label}</label>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
+      <Sidebar 
+        sidebarOpen={sidebarOpen}
+        toggleSidebar={toggleSidebar}
+        selectedCategories={selectedCategories}
+        handleCategoryChange={handleCategoryChange}
+        selectedInstitutes={selectedInstitutes}
+        handleInstituteChange={handleInstituteChange}
+      />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger value="events">Events</TabsTrigger>
-                <TabsTrigger value="calendar">Calendar</TabsTrigger>
-                <TabsTrigger value="clubs">Clubs</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  className="pl-8"
-                  type="text"
-                  placeholder="Search events"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Link href={'/'}>
-                <Button>
-                  <Home className="mr-2 h-4 w-4" />Home
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
+      <MainContent
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        toggleSidebar={toggleSidebar}
+        renderTabContent={renderTabContent}
+      />
 
-        {renderTabContent()}
-      </div>
     </div>
   );
 };
