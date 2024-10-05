@@ -50,6 +50,7 @@ import ClubEvents from "./_tabs/ClubEvents";
 import CalendarEvents from "./_tabs/CalendarEvents";
 import Sidebar from "./Sidebar";
 import MainContent from "./MainContent";
+import useSWR from 'swr';
 
 interface Event {
   _id: string;
@@ -86,6 +87,8 @@ const institutes = [
   { value: "ips", label: "IPS" },
   { value: "ild", label: "ILD" },
 ];
+
+
 
 const EventCard: React.FC<{ event: Event }> = ({ event }): JSX.Element => {
   return (
@@ -181,10 +184,18 @@ const LoadingSkeleton = () => (
 
 
 // main component
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error('Failed to load events');
+  }
+  return data.data;
+};
 const EventsPage: React.FC = () => {
-  const [events, setEvents] = useState<Event[]>([]);
+  // const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedInstitutes, setSelectedInstitutes] = useState<string[]>([]);
@@ -195,38 +206,45 @@ const EventsPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // const [events, setEvents] = useState([]);
 
+  const { data: events, error, isValidating } = useSWR<Event[]>('/api/event', fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    refreshInterval: 60000, // Refresh every 60 seconds
+    dedupingInterval: 60000, // Dedupe requests within 60 seconds
+  });
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch("/api/event");
-        const data = await response.json();
+  // useEffect(() => {
+  //   const fetchEvents = async () => {
+  //     try {
+  //       const response = await fetch("/api/event");
+  //       const data = await response.json();
 
-        if (data.success) {
-          setEvents(data.data);
-        } else {
-          setError("Failed to load events");
-        }
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        // setLoading(false);
-        setIsLoadingEvents(false);
-      }
-    };
+  //       if (data.success) {
+  //         setEvents(data.data);
+  //       } else {
+  //         setError("Failed to load events");
+  //       }
+  //     } catch (err) {
+  //       setError((err as Error).message);
+  //     } finally {
+  //       // setLoading(false);
+  //       setIsLoadingEvents(false);
+  //     }
+  //   };
 
-    fetchEvents();
-  }, []);
+  //   fetchEvents();
+  // }, []);
 
-  const filteredEvents = events.filter(
+  const filteredEvents = events?.filter(
     (event) =>
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (selectedCategories.length === 0 || selectedCategories.includes(event.eventType)) &&
       (selectedInstitutes.length === 0 || selectedInstitutes.includes(event.clubName))
-  );
+  ) ?? [];
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategories(prev =>
@@ -326,7 +344,7 @@ const EventsPage: React.FC = () => {
   };
 
   const renderEventsList = () => {
-    if (isLoadingEvents) {
+    if (isValidating && !events) {
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, index) => (
@@ -337,7 +355,7 @@ const EventsPage: React.FC = () => {
     }
 
     if (error) {
-      return <div className="text-red-500">{error}</div>;
+      return <div className="text-red-500">Failed to load events</div>;
     }
 
     return (
