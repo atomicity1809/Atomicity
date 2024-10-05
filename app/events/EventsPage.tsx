@@ -317,7 +317,7 @@ const EventsPage: React.FC = () => {
     );
   };
 
-  const renderTabContent = () => {
+ const renderTabContent = () => {
     switch (activeTab) {
       case "events":
         return (
@@ -336,7 +336,7 @@ const EventsPage: React.FC = () => {
         );
       case "calendar":
         return (
-          <CalendarEvents events={events} />
+          <CalendarEvents events={events || []} />
         );
       default:
         return null;
