@@ -794,8 +794,8 @@ const EventPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle>Additional Information</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <MDPreview source={event.additionalInfo} />
+                <CardContent data-color-mode="light">
+                  <MDPreview source={event.additionalInfo}/>
                 </CardContent>
               </Card>
 

@@ -1,6 +1,9 @@
-"use client";
+"use client"
 import React, { useEffect, useState } from "react";
-import { Avatar } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useUser } from "@clerk/nextjs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,60 +15,50 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { useUser } from "@clerk/nextjs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
-const ClubCard = ({ club }: { club: any }) => {
+interface Club {
+  _id: string;
+  clubName: string;
+  shortName: string;
+  logo: string;
+  description: string;
+}
+
+const ClubCard: React.FC<{ club: Club }> = ({ club }) => {
   const router = useRouter();
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <div className="w-40 h-40 p-0 flex flex-col items-center justify-center hover:underline hover:bg-none">
-          <Avatar className="w-24 h-24 mb-2 border-[1px] border-black cursor-pointer">
-            <Image
-              src={club?.logo}
-              alt={`${club?.clubName} logo`}
-              className="object-cover"
-              height={100}
-              width={100}
-            />
+        <div className="z-99999 w-full p-4 flex flex-col items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+          <Avatar className="w-24 h-24 mb-2 border border-gray-200">
+            <AvatarImage src={club.logo} alt={`${club.clubName} logo`}/>
+            <AvatarFallback>{club.shortName}</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-light text-center">
-            {club?.clubName}
-          </span>
+          <span className="text-sm font-medium text-center">{club.clubName}</span>
         </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Avatar className="w-10 h-10">
-              <Image
-                src={club?.logo}
-                alt={`${club?.shortName} logo`}
-                className="object-cover"
-                height={100}
-                width={100}
-              />
+              <AvatarImage src={club.logo} alt={`${club.shortName} logo`} />
+              <AvatarFallback>{club.shortName}</AvatarFallback>
             </Avatar>
             <div>
-              <div>{club?.shortName}</div>
-              <div className="text-sm font-normal text-gray-500">
-                {club?.clubName}
-              </div>
+              <div>{club.shortName}</div>
+              <div className="text-sm font-normal text-gray-500">{club.clubName}</div>
             </div>
           </DialogTitle>
-          <DialogDescription className="mt-4">
-            {club?.description}
-          </DialogDescription>
+          <DialogDescription className="mt-4">{club.description}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <Button onClick={() => router.push(`/club/${club?._id}`)}>
-            Explore
-          </Button>
+          <Button onClick={() => router.push(`/club/${club._id}`)}>Know More about Club</Button>
         </div>
-        <DialogFooter className=" mr-auto ml-auto text-xs text-muted-foreground">
+        <DialogFooter className="text-xs text-muted-foreground mr-auto ml-auto">
           © Atomicity Events Inc. | All Rights Reserved | 2024-2025
         </DialogFooter>
       </DialogContent>
@@ -73,15 +66,21 @@ const ClubCard = ({ club }: { club: any }) => {
   );
 };
 
-const ClubEvents = () => {
-  const [clubs, setClubs] = useState([]); // State to store club data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(""); // Error state
-  const user = useUser();
-  // const router = useRouter
+const ClubSkeleton: React.FC = () => (
+  <div className="w-full p-4 flex flex-col items-center justify-center">
+    <Skeleton className="w-24 h-24 rounded-full mb-2" />
+    <Skeleton className="h-4 w-3/4" />
+  </div>
+);
+
+const ClubEvents: React.FC = () => {
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useUser();
 
   useEffect(() => {
-    // Fetch club data from the backend
     const fetchClubs = async () => {
       try {
         const response = await fetch("/api/getclubs");
@@ -89,37 +88,51 @@ const ClubEvents = () => {
           throw new Error("Failed to fetch clubs");
         }
         const data = await response.json();
-        console.log(data.data);
-        setClubs(data.data); // Set the fetched data
+        setClubs(data.data);
       } catch (err) {
-        setError((err as Error).message); // Set error message
+        setError((err as Error).message);
       } finally {
-        setLoading(false); // Set loading to false once the data is fetched
+        setLoading(false);
       }
     };
 
-    fetchClubs(); // Call the async function
-  }, []); // Empty dependency array to run only once on mount
+    fetchClubs();
+  }, []);
 
-  if (loading) {
-    return <div>Loading...</div>; // Loading state
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>; // Error state
-  }
+  const filteredClubs = clubs.filter((club) =>
+    club.clubName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="p-8 min-h-screen">
-      <h1 className="text-2xl font-bold text-center mb-8">
-        Explore Campus Clubs
-      </h1>
-      <ScrollArea className="h-[calc(100vh-10rem)]">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 justify-items-center">
-          {clubs.map((club: any) => (
-            <ClubCard key={club?._id} club={club} />
-          ))}
+      <h1 className="text-3xl font-bold text-center mb-8">Explore Campus Clubs</h1>
+      <div className="max-w-md mx-auto mb-6">
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search clubs..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
+      </div>
+      <ScrollArea className="h-[calc(100vh-12rem)]">
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {[...Array(10)].map((_, index) => (
+              <ClubSkeleton key={index} />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-500">{error}</div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {filteredClubs.map((club) => (
+              <ClubCard key={club._id} club={club} />
+            ))}
+          </div>
+        )}
       </ScrollArea>
     </div>
   );
