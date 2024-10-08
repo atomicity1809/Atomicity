@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const event = await Event.findById(eventId);
     if (!event) {
       return NextResponse.json(
-        { success: false, error: "Event not found" },
+        { success: false, message: "Event not found" },
         { status: 404 }
       );
     }
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     // Check if registration is closed
     if (!event.isAvailableToReg) {
       return NextResponse.json(
-        { success: false, error: "Registration closed" },
+        { success: false, message: "Registration closed" },
         { status: 406 }
       );
     }
@@ -45,18 +45,22 @@ export async function POST(req: NextRequest) {
       // Save the updated event
       await event.save();
     }
+    else{
+      return NextResponse.json(
+        { success: false, message: "User already registered" },
+        { status: 408 }
+      );
+    }
 
     console.log("step3 pass, userId added to event registered users");
 
     
-    // const user = await User.findById(userId);
     const user = await User.findOne({ clerkId: userId });
 
-    // console.log("line 56: ", user);
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "User not found" },
-        { status: 408 }
+        { success: false, message: "User not found" },
+        { status: 410 }
       );
     }
     console.log("step4 passed user found");
@@ -78,7 +82,7 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: (error as Error).message },
+      { success: false, message: (error as Error).message },
       { status: 400 }
     );
   }
