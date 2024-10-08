@@ -246,6 +246,7 @@ const EventPage: React.FC = () => {
     if (!user) {
       console.log("Please log in first to register for the event.");
       toast.warning("Please log in first to register for the event.");
+      setIsDialogOpen(false);
       return;
     }
     bang_setLoading(true);
@@ -292,10 +293,10 @@ const EventPage: React.FC = () => {
         body: JSON.stringify(requestBody),
       });
 
-      const data = await response.json();
+      const resBody = await response.json();
 
       if (response.status == 200) {
-        console.log("Registration successful:", data);
+        console.log("Registration successful:", resBody);
         toast.success("Registration successful");
         setRegistrationState("sending_email");
 
@@ -342,9 +343,16 @@ const EventPage: React.FC = () => {
       } else if (
         response.status == 404 ||
         response.status == 406 ||
-        response.status == 408
+        response.status == 408 ||
+        response.status == 410
       ) {
-        toast.error("Something went wrong");
+        // const resBody = await response.json(); // Parse response body
+        toast.error(resBody.message);
+        setIsDialogOpen(false);
+        setRegistrationState("initial");
+        // console.log(resBody)
+        // console.log(resBody.message);
+        // toast.error(response.message);
       } else {
         console.error("Registration failed:");
         toast.error("Registration failed:");
@@ -449,8 +457,8 @@ const EventPage: React.FC = () => {
         const response = await fetch(`/api/event/${eventId}`);
         const data = await response.json();
         console.log("Data: ", data.data[0]);
-        console.log("rs",response.status);
-        if(response.status === 404 || response.status === 400){
+        console.log("rs", response.status);
+        if (response.status === 404 || response.status === 400) {
           notFound();
         }
 
@@ -466,8 +474,10 @@ const EventPage: React.FC = () => {
 
           if (fetchedEventData["registeredUsers"].includes(userID)) {
             setRegisterStatus(1);
+          } else if (fetchedEventData["isAvailableToReg"] == false) {
+            setRegisterStatus(3);
           } else if (
-            fetchedEventData["noMaxParticipants"] == true &&
+            fetchedEventData["noMaxParticipants"] == false &&
             fetchedEventData["registeredUsers"].length >=
               fetchedEventData["maxAllowedParticipants"]
           ) {
@@ -491,8 +501,7 @@ const EventPage: React.FC = () => {
       try {
         const response = await fetch(`/api/getorganizer/${organizerId}`);
         const data = await response.json();
-        
-        
+
         if (data.success) {
           const fetchedOwnerData = data.data[0];
           (Object.keys(organizer) as (keyof Organizer)[]).forEach((key) => {
@@ -521,31 +530,25 @@ const EventPage: React.FC = () => {
         {/* Basic meta tags */}
         <title>{event.title} | Atomicity</title>
         <meta name="description" content={event.subtitle} />
-        
+
         {/* Open Graph tags optimized for Facebook, WhatsApp, and other platforms */}
         <meta property="og:title" content={`${event.title} | Atomicity`} />
         <meta property="og:description" content={event.subtitle} />
-        <meta property="og:url" content={`https://atomicity.vercel.app/events/${event._id}`} />
+        <meta
+          property="og:url"
+          content={`https://atomicity.vercel.app/events/${event._id}`}
+        />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Atomicity Events" />
         <meta property="og:locale" content="en_US" />
-
-        
       </Head>
-
-
-
-
-
-
 
       {loading ? (
         <EventPageSkeleton />
       ) : error ? (
         <div className="container mx-auto px-4 py-8 text-center">
           {/* <h1 className="text-2xl font-bold text-red-600">{error}</h1> */}
-          <NotFound/>
-          
+          <NotFound />
         </div>
       ) : (
         <div className="container mx-auto px-4 py-8">
@@ -606,6 +609,8 @@ const EventPage: React.FC = () => {
                       ? "bg-gray-500 cursor-not-allowed hover:cursor-not-allowed"
                       : registerStatus === 2
                       ? "bg-red-500 cursor-not-allowed hover:cursor-not-allowed"
+                      : registerStatus === 3
+                      ? "bg-red-500 cursor-not-allowed hover:cursor-not-allowed"
                       : "bg-purple-500 hover:bg-purple-700"
                   }`}
                   onClick={handleRegister}
@@ -615,7 +620,9 @@ const EventPage: React.FC = () => {
                     ? "Register"
                     : registerStatus === 1
                     ? "Registered"
-                    : "Registration Full"}
+                    : registerStatus === 2
+                    ? "Registration Full"
+                    : "Registration Closed"}
                 </Button>
               </div>
             </div>
@@ -776,7 +783,6 @@ const EventPage: React.FC = () => {
                             Visit Club Page
                           </span>
                         </div>
-
                       </div>
                     </CardContent>
                   </Card>
@@ -836,6 +842,8 @@ const EventPage: React.FC = () => {
                           ? "bg-gray-500 cursor-not-allowed hover:cursor-not-allowed"
                           : registerStatus === 2
                           ? "bg-red-500 cursor-not-allowed hover:cursor-not-allowed"
+                          : registerStatus === 3
+                          ? "bg-red-500 cursor-not-allowed hover:cursor-not-allowed"
                           : "bg-purple-500 hover:bg-purple-700"
                       }`}
                       onClick={handleRegister}
@@ -845,7 +853,9 @@ const EventPage: React.FC = () => {
                         ? "Register"
                         : registerStatus === 1
                         ? "Registered"
-                        : "Registration Full"}
+                        : registerStatus === 2
+                        ? "Registration Full"
+                        : "Registration Closed"}
                     </Button>
 
                     {/* <div className="text-center text-sm text-gray-500">
