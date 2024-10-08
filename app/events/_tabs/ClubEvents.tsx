@@ -14,6 +14,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useUser } from "@clerk/nextjs";
 
 const ClubCard = ({ club }: { club: any }) => {
   const router = useRouter();
@@ -24,14 +25,16 @@ const ClubCard = ({ club }: { club: any }) => {
         <div className="w-40 h-40 p-0 flex flex-col items-center justify-center hover:underline hover:bg-none">
           <Avatar className="w-24 h-24 mb-2 border-[1px] border-black cursor-pointer">
             <Image
-              src={club.logo}
-              alt={`${club.clubName} logo`}
+              src={club?.logo}
+              alt={`${club?.clubName} logo`}
               className="object-cover"
               height={100}
               width={100}
             />
           </Avatar>
-          <span className="text-sm font-light text-center">{club.clubName}</span>
+          <span className="text-sm font-light text-center">
+            {club?.clubName}
+          </span>
         </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -39,26 +42,26 @@ const ClubCard = ({ club }: { club: any }) => {
           <DialogTitle className="flex items-center gap-2">
             <Avatar className="w-10 h-10">
               <Image
-                src={club.logo}
-                alt={`${club.shortName} logo`}
+                src={club?.logo}
+                alt={`${club?.shortName} logo`}
                 className="object-cover"
                 height={100}
                 width={100}
               />
             </Avatar>
             <div>
-              <div>{club.shortName}</div>
+              <div>{club?.shortName}</div>
               <div className="text-sm font-normal text-gray-500">
-                {club.clubName}
+                {club?.clubName}
               </div>
             </div>
           </DialogTitle>
           <DialogDescription className="mt-4">
-            {club.description}
+            {club?.description}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <Button onClick={() => router.push(`/club/${club._id}`)}>
+          <Button onClick={() => router.push(`/club/${club?._id}`)}>
             Explore
           </Button>
         </div>
@@ -74,6 +77,7 @@ const ClubEvents = () => {
   const [clubs, setClubs] = useState([]); // State to store club data
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(""); // Error state
+  const user = useUser();
   // const router = useRouter
 
   useEffect(() => {
@@ -85,6 +89,7 @@ const ClubEvents = () => {
           throw new Error("Failed to fetch clubs");
         }
         const data = await response.json();
+        console.log(data.data);
         setClubs(data.data); // Set the fetched data
       } catch (err) {
         setError((err as Error).message); // Set error message
@@ -111,7 +116,7 @@ const ClubEvents = () => {
       </h1>
       <ScrollArea className="h-[calc(100vh-10rem)]">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 justify-items-center">
-          {clubs.map(({ club }: { club: any }) => (
+          {clubs.map((club: any) => (
             <ClubCard key={club?._id} club={club} />
           ))}
         </div>
