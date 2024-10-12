@@ -26,6 +26,7 @@ import {
   ChevronsUpDown,
   X,
   LayoutDashboard,
+  HomeIcon,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -95,20 +96,14 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-          </DropdownMenuItem>
+          
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
-            <Link href={'/settings/user'}>
-              <span>Settings</span>
+            <Link href={'/dashboard/user'}>
+              <span>Dashboard</span>
             </Link>
           </DropdownMenuItem>
+
           <DropdownMenuSeparator />
           <DropdownMenuItem>
             <LogOut className="mr-2 h-4 w-4" />
@@ -125,19 +120,23 @@ const Sidebar: React.FC<SidebarProps> = ({
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } fixed inset-y-0 left-0 z-50 w-64 bg-background border-r p-4 overflow-y-auto transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:w-64`}
     >
-      <div className='flex items-center justify-between mb-4'>
-        <div className='flex items-center space-x-2'>
-          <Link href={"/"}>
-            <span className='border-[1px] rounded-md border-purple-500 p-1 bg-purple-200'>
-              <span className='font-light text-sm'>Atomi</span>
-              <span className='font-bold text-sm'>City</span>
-            </span>
-          </Link>
-          <UserMenu />
-        </div>
+      <div className='flex items-center justify-center mb-4'>
+      <div className="flex items-center space-x-2">
+        <Link href="/">
+          <span className="border-[1px] rounded-md border-purple-500 p-1 bg-purple-200 transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-purple-300 hover:border-purple-600">
+            <span className="font-light text-sm transition-all duration-300 ease-in-out hover:text-purple-800">Atomi</span>
+            <span className="font-bold text-sm transition-all duration-300 ease-in-out hover:text-purple-900">City</span>
+          </span>
+        </Link>
+      </div>
+
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={toggleSidebar}>
           <X className="h-4 w-4" />
         </Button>
+      </div>
+      <div className=" flex items-center justify-center gap-2">
+        <UserMenu />
+        <span className="flex items-center justify-center text-sm text-muted-foreground">@{user?.username}</span>
       </div>
       <hr className="my-2"/>
       <div className="space-y-4">

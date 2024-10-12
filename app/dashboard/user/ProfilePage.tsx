@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Calendar, User, Award, MessageSquare, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-// Lazy load the sub-pages
 const Main = lazy(() => import('./Main'));
 const Profile = lazy(() => import('./Profile'));
 const MyEvents = lazy(() => import('./MyEvents'));
 const Certificates = lazy(() => import('./Certificates'));
 const Conversations = lazy(() => import('./Conversations'));
 
-// Loading skeleton component
 const LoadingSkeleton = () => (
   <div className="animate-pulse">
     <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -31,7 +29,7 @@ const ProfilePage = () => {
         {(() => {
           switch (activePage) {
             case 'Main':
-              return <Main />;
+              return <Main setActivePage={setActivePage} />;
             case 'Profile':
               return <Profile />;
             case 'My Events':
@@ -41,7 +39,7 @@ const ProfilePage = () => {
             case 'Conversations':
               return <Conversations />;
             default:
-              return <Main />;
+              return <Main setActivePage={setActivePage} />;
           }
         })()}
       </Suspense>
