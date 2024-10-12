@@ -14,7 +14,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   CalendarIcon,
   MapPinIcon,
@@ -41,8 +41,18 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,7 +60,7 @@ import ClubEvents from "./_tabs/ClubEvents";
 import CalendarEvents from "./_tabs/CalendarEvents";
 import Sidebar from "./Sidebar";
 import MainContent from "./MainContent";
-import useSWR from 'swr';
+import useSWR from "swr";
 
 interface Event {
   _id: string;
@@ -68,6 +78,8 @@ interface Event {
   clubName: string;
   eventType: string;
   registeredUsers: string[];
+  ownerName: string;
+  ownerLogo: string;
 }
 
 const clubCategories = [
@@ -87,8 +99,6 @@ const institutes = [
   { value: "ips", label: "IPS" },
   { value: "ild", label: "ILD" },
 ];
-
-
 
 const EventCard: React.FC<{ event: Event }> = ({ event }): JSX.Element => {
   return (
@@ -125,10 +135,13 @@ const EventCard: React.FC<{ event: Event }> = ({ event }): JSX.Element => {
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-2">
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" alt={event.clubName} />
+              <AvatarImage
+                src={event.ownerLogo}
+                alt={event.clubName}
+              />
               <AvatarFallback>{event.clubName}</AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium">Rare Society of Cultural Events</span>
+            <span className="text-sm font-medium">{event.ownerName}</span>
           </div>
         </div>
         <div className="flex justify-between items-center">
@@ -182,13 +195,12 @@ const LoadingSkeleton = () => (
   </Card>
 );
 
-
 // main component
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   const data = await response.json();
   if (!data.success) {
-    throw new Error('Failed to load events');
+    throw new Error("Failed to load events");
   }
   return data.data;
 };
@@ -206,7 +218,11 @@ const EventsPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // const [events, setEvents] = useState([]);
 
-  const { data: events, error, isValidating } = useSWR<Event[]>('/api/event', fetcher, {
+  const {
+    data: events,
+    error,
+    isValidating,
+  } = useSWR<Event[]>("/api/event", fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     refreshInterval: 60000, // Refresh every 60 seconds
@@ -239,25 +255,28 @@ const EventsPage: React.FC = () => {
   //   fetchEvents();
   // }, []);
 
-  const filteredEvents = events?.filter(
-    (event) =>
-      event.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedCategories.length === 0 || selectedCategories.includes(event.eventType)) &&
-      (selectedInstitutes.length === 0 || selectedInstitutes.includes(event.clubName))
-  ) ?? [];
+  const filteredEvents =
+    events?.filter(
+      (event) =>
+        event.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedCategories.length === 0 ||
+          selectedCategories.includes(event.eventType)) &&
+        (selectedInstitutes.length === 0 ||
+          selectedInstitutes.includes(event.clubName))
+    ) ?? [];
 
   const handleCategoryChange = (value: string) => {
-    setSelectedCategories(prev =>
+    setSelectedCategories((prev) =>
       prev.includes(value)
-        ? prev.filter(item => item !== value)
+        ? prev.filter((item) => item !== value)
         : [...prev, value]
     );
   };
 
   const handleInstituteChange = (value: string) => {
-    setSelectedInstitutes(prev =>
+    setSelectedInstitutes((prev) =>
       prev.includes(value)
-        ? prev.filter(item => item !== value)
+        ? prev.filter((item) => item !== value)
         : [...prev, value]
     );
   };
@@ -274,22 +293,27 @@ const EventsPage: React.FC = () => {
       );
     }
 
-
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.imageUrl} alt={user?.fullName || ''} />
-              <AvatarFallback>{user?.firstName?.charAt(0) || ''}</AvatarFallback>
+              <AvatarImage src={user?.imageUrl} alt={user?.fullName || ""} />
+              <AvatarFallback>
+                {user?.firstName?.charAt(0) || ""}
+              </AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user?.fullName}</p>
-              <p className="text-xs leading-none text-muted-foreground">{user?.primaryEmailAddress?.emailAddress}</p>
+              <p className="text-sm font-medium leading-none">
+                {user?.fullName}
+              </p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user?.primaryEmailAddress?.emailAddress}
+              </p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -303,7 +327,7 @@ const EventsPage: React.FC = () => {
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
-            <Link href={'/settings/user'}>
+            <Link href={"/settings/user"}>
               <span>Settings</span>
             </Link>
           </DropdownMenuItem>
@@ -317,7 +341,7 @@ const EventsPage: React.FC = () => {
     );
   };
 
- const renderTabContent = () => {
+  const renderTabContent = () => {
     switch (activeTab) {
       case "events":
         return (
@@ -331,13 +355,9 @@ const EventsPage: React.FC = () => {
           </div>
         );
       case "clubs":
-        return (
-          <ClubEvents/>
-        );
+        return <ClubEvents />;
       case "calendar":
-        return (
-          <CalendarEvents events={events || []} />
-        );
+        return <CalendarEvents events={events || []} />;
       default:
         return null;
     }
@@ -378,7 +398,7 @@ const EventsPage: React.FC = () => {
   //         <Skeleton className="h-4 w-1/2 mb-4" />
   //         {/* Repeat for other sidebar items */}
   //       </div>
-        
+
   //       {/* Main content skeleton */}
   //       <div className="flex-1 p-6">
   //         <div className="flex justify-between items-center mb-6">
@@ -398,20 +418,18 @@ const EventsPage: React.FC = () => {
   //   );
   // }
 
-
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen text-red-500">{error}</div>
+      <div className="flex justify-center items-center h-screen text-red-500">
+        {error}
+      </div>
     );
   }
 
- 
-  
   return (
     <div className="flex h-screen bg-background">
-      
       {/* Sidebar */}
-      <Sidebar 
+      <Sidebar
         sidebarOpen={sidebarOpen}
         toggleSidebar={toggleSidebar}
         selectedCategories={selectedCategories}
@@ -429,7 +447,6 @@ const EventsPage: React.FC = () => {
         toggleSidebar={toggleSidebar}
         renderTabContent={renderTabContent}
       />
-
     </div>
   );
 };

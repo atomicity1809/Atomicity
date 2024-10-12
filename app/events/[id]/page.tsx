@@ -105,10 +105,10 @@ interface Event {
   ownerId: string;
 }
 
-interface Organizer {
-  clubName: string;
-  logo: string;
-}
+// interface Organizer {
+//   clubName: string;
+//   logo: string;
+// }
 
 const event: Event = {
   _id: "",
@@ -135,10 +135,10 @@ const event: Event = {
   ownerId: "",
 };
 
-const organizer: Organizer = {
-  clubName: "",
-  logo: "",
-};
+// const organizer: Organizer = {
+//   clubName: "",
+//   logo: "",
+// };
 
 const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
   const [copied, setCopied] = useState(false);
@@ -210,6 +210,7 @@ const EventPage: React.FC = () => {
   const { isSignedIn, user, isLoaded } = useUser();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [organizerId, setOrganizerId] = useState("");
+  const [isInterested, setIsInterested] = useState(false);
   const router = useRouter();
   const [registrationState, setRegistrationState] = useState<
     "initial" | "registering" | "sending_email" | "success"
@@ -438,6 +439,37 @@ const EventPage: React.FC = () => {
         );
     }
   };
+  const handleInterested = async () => {
+    // handle interested button click
+    const userID = user?.id;
+    if(isInterested===false){
+      setIsInterested(true);
+      console.log("value set as true");
+    }
+    else{
+      setIsInterested(false);
+      console.log("value set as false");
+    }
+    console.log("isInterested:",isInterested);
+    const response = await fetch(`/api/event/interested`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userID: userID,
+        eventID: eventId,
+        interested: isInterested,
+      }),
+    });
+    if (response.ok) {
+      console.log("liked");
+    }
+    else{
+      setIsInterested(!isInterested);
+      toast.error("Error in liking event");
+    }
+  };
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [orgLoading, setOrgLoading] = useState<boolean>(true);
@@ -454,7 +486,14 @@ const EventPage: React.FC = () => {
     const fetchEventData = async () => {
       try {
         const userID = user?.id;
-        const response = await fetch(`/api/event/${eventId}`);
+        // const response = await fetch(`/api/event/${eventId}`);
+        const response = await fetch(`/api/event/${eventId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userID: userID }),
+        });
         const data = await response.json();
         console.log("Data: ", data.data[0]);
         console.log("rs", response.status);
@@ -465,10 +504,12 @@ const EventPage: React.FC = () => {
         if (data.success) {
           // setEventData(data.data[0]);
           const fetchedEventData = data.data[0];
+          const fetchedEventInterest = data.isInterested;
           Object.keys(fetchedEventData).forEach((key) => {
             event[key] = fetchedEventData[key];
           });
           setOrganizerId(fetchedEventData["ownerId"]);
+          setIsInterested(fetchedEventInterest);
           // console.log("fetchEventData: ", fetchedEventData);
           // console.log(fetchedEventData["registeredUsers"].includes(userID));
 
@@ -496,33 +537,33 @@ const EventPage: React.FC = () => {
     fetchEventData();
   }, []);
 
-  useEffect(() => {
-    const fetchOrganizerDetails = async () => {
-      try {
-        const response = await fetch(`/api/getorganizer/${organizerId}`);
-        const data = await response.json();
+  // useEffect(() => {
+  //   const fetchOrganizerDetails = async () => {
+  //     try {
+  //       const response = await fetch(`/api/getorganizer/${organizerId}`);
+  //       const data = await response.json();
 
-        if (data.success) {
-          const fetchedOwnerData = data.data[0];
-          (Object.keys(organizer) as (keyof Organizer)[]).forEach((key) => {
-            // Check if the fetchedOwnerData has the same key
-            if (key in fetchedOwnerData) {
-              organizer[key] =
-                fetchedOwnerData[key as keyof typeof fetchedOwnerData];
-            }
-          });
-        } else {
-          setOrgError("Failed to load organizer details");
-        }
-      } catch (err) {
-        setOrgError((err as Error).message);
-      } finally {
-        setOrgLoading(false);
-      }
-    };
+  //       if (data.success) {
+  //         const fetchedOwnerData = data.data[0];
+  //         (Object.keys(organizer) as (keyof Organizer)[]).forEach((key) => {
+  //           // Check if the fetchedOwnerData has the same key
+  //           if (key in fetchedOwnerData) {
+  //             organizer[key] =
+  //               fetchedOwnerData[key as keyof typeof fetchedOwnerData];
+  //           }
+  //         });
+  //       } else {
+  //         setOrgError("Failed to load organizer details");
+  //       }
+  //     } catch (err) {
+  //       setOrgError((err as Error).message);
+  //     } finally {
+  //       setOrgLoading(false);
+  //     }
+  //   };
 
-    fetchOrganizerDetails();
-  }, [event.ownerId]);
+  //   fetchOrganizerDetails();
+  // }, [event.ownerId]);
 
   return (
     <>
@@ -568,7 +609,7 @@ const EventPage: React.FC = () => {
                   </Button>
                 </Link>
                 <Image
-                  src={organizer?.logo}
+                  src={event?.ownerLogo}
                   alt="Organizer Logo"
                   width={40}
                   height={40}
@@ -587,7 +628,10 @@ const EventPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   className="flex items-center"
+                  onClick={handleInterested}
+                  
                 >
+                  {isInterested? "liked":"dislike"}
                   <StarIcon className="h-4 w-4 mr-1" />I am Interested
                 </Button>
                 <Popover>
@@ -754,7 +798,7 @@ const EventPage: React.FC = () => {
                     <CardContent>
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-16 w-16">
-                          <AvatarImage src={organizer?.logo} alt="Organizer" />
+                          <AvatarImage src={event?.ownerLogo} alt="Organizer" />
                           {/* <AvatarFallback>NUok</AvatarFallback> */}
                         </Avatar>
                         <div className="relative group">
@@ -763,7 +807,7 @@ const EventPage: React.FC = () => {
                             className="text-lg font-semibold text-blue-600 hover:text-blue-800 transition-colors duration-300 flex items-center"
                             rel="noopener noreferrer"
                           >
-                            {organizer?.clubName}
+                            {event?.ownerName}
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
@@ -795,7 +839,7 @@ const EventPage: React.FC = () => {
                   <CardTitle>Additional Information</CardTitle>
                 </CardHeader>
                 <CardContent data-color-mode="light">
-                  <MDPreview source={event.additionalInfo}/>
+                  <MDPreview source={event.additionalInfo} />
                 </CardContent>
               </Card>
 
