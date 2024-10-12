@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar, User, Mail, MessageSquare, Award, ChevronRight, Bell } from 'lucide-react';
-import { useUser } from '@clerk/nextjs';
+import { UserButton, useUser } from '@clerk/nextjs';
 
-const Main = () => {
+const Main = ({ setActivePage}:any) => {
     // from clerk hook
     const {user} = useUser();
 
@@ -32,10 +32,7 @@ const Main = () => {
           <Button variant="ghost" size="icon">
             <Bell className="h-6 w-6" />
           </Button>
-          <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>JD</AvatarFallback>
-          </Avatar>
+          <UserButton/>
         </div>
       </header>
 
@@ -49,15 +46,16 @@ const Main = () => {
           <CardContent>
             <div className="flex items-center space-x-4 mb-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarImage src={user?.imageUrl} alt="@shadcn" />
+                <AvatarFallback>{user?.firstName}</AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-xl font-semibold">John Doe</h2>
-                <p className="text-gray-500">john.doe@example.com</p>
+                <h2 className="text-xl font-semibold">{user?.fullName}</h2>
+                <span className=' text-muted-foreground font-mono bg-purple-200 p-1 rounded-xl'>@{user?.username}</span>
+                <p className="text-gray-500">{user?.emailAddresses[0].emailAddress}</p>
               </div>
             </div>
-            <Button variant="outline" className="w-full">Edit Profile</Button>
+            <Button variant="outline" className="w-full" onClick={() => setActivePage('Profile')}>Edit Profile</Button>
           </CardContent>
         </Card>
 
