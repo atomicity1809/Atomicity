@@ -85,7 +85,7 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
     console.error("Error updating admin details:", error);
 
     // Specific error handling for validation errors
-    if (error.name === "ValidationError") {
+    if ((error as Error).name === "ValidationError") {
       return createErrorResponse("Validation failed for the provided data", 400);
     }
 
