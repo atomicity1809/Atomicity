@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -25,6 +25,7 @@ interface Club {
   shortName: string;
   logo: string;
   description: string;
+  clerkId: string;
 }
 
 const ClubCard: React.FC<{ club: Club }> = ({ club }) => {
@@ -35,10 +36,12 @@ const ClubCard: React.FC<{ club: Club }> = ({ club }) => {
       <DialogTrigger asChild>
         <div className="z-99999 w-full p-4 flex flex-col items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
           <Avatar className="w-24 h-24 mb-2 border border-gray-200">
-            <AvatarImage src={club.logo} alt={`${club.clubName} logo`}/>
+            <AvatarImage src={club.logo} alt={`${club.clubName} logo`} />
             <AvatarFallback>{club.shortName}</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-center">{club.clubName}</span>
+          <span className="text-sm font-medium text-center">
+            {club.clubName}
+          </span>
         </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -50,13 +53,19 @@ const ClubCard: React.FC<{ club: Club }> = ({ club }) => {
             </Avatar>
             <div>
               <div>{club.shortName}</div>
-              <div className="text-sm font-normal text-gray-500">{club.clubName}</div>
+              <div className="text-sm font-normal text-gray-500">
+                {club.clubName}
+              </div>
             </div>
           </DialogTitle>
-          <DialogDescription className="mt-4">{club.description}</DialogDescription>
+          <DialogDescription className="mt-4">
+            {club.description}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <Button onClick={() => router.push(`/club/${club.clerkId}`)}>Know More about Club</Button>
+          <Button onClick={() => router.push(`/club/${club.clerkId}`)}>
+            Know More about Club
+          </Button>
         </div>
         <DialogFooter className="text-xs text-muted-foreground mr-auto ml-auto">
           © Atomicity Events Inc. | All Rights Reserved | 2024-2025
@@ -105,7 +114,9 @@ const ClubEvents: React.FC = () => {
 
   return (
     <div className="p-8 min-h-screen">
-      <h1 className="text-3xl font-bold text-center mb-8">Explore Campus Clubs</h1>
+      <h1 className="text-3xl font-bold text-center mb-8">
+        Explore Campus Clubs
+      </h1>
       <div className="max-w-md mx-auto mb-6">
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
