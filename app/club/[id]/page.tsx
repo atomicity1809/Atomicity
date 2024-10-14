@@ -46,20 +46,23 @@ const ClubProfile: React.FC = () => {
       try {
         const response = await fetch(`/api/admin/${id}`);
         if (response.ok) {
-          const data = await response.json();
+          const dataArray = await response.json();
+          const data = dataArray.data[0];
+          
+          console.log("got response: ",data);
           setClubData({
-            coverImage: data.data.coverImage || "",
-            bio: data.data.bio || "",
-            membershipForm: data.data.membershipForm || "",
-            socialMediaLinks: data.data.socialMediaLinks || [],
-            facultyAdvisor: data.data.facultyAdvisor || "",
-            website: data.data.website || "",
-            clubName: data.data.clubName || "",
-            type: data.data.type || "",
-            logo: data.data.logo || "",
-            emailId: data.data.emailId || "",
-            events: data.data.events || [],
-            members: data.data.members || [],
+            coverImage: data.coverImage || "",
+            bio: data.bio || "",
+            membershipForm: data.membershipForm || "",
+            socialMediaLinks: data.socialMediaLinks || [],
+            facultyAdvisor: data.facultyAdvisor || "",
+            website: data.website || "",
+            clubName: data.clubName || "",
+            type: data.type || "",
+            logo: data.logo || "",
+            emailId: data.emailId || "",
+            events: data.events || [],
+            members: data.members || [],
           });
         } else {
           toast.error("Failed to fetch club data");

@@ -297,7 +297,7 @@ const EventPage: React.FC = () => {
       const resBody = await response.json();
 
       if (response.status == 200) {
-        console.log("Registration successful:", resBody);
+        // console.log("Registration successful:", resBody);
         toast.success("Registration successful");
         setRegistrationState("sending_email");
 
@@ -317,7 +317,7 @@ const EventPage: React.FC = () => {
           fullName: userName,
         };
 
-        console.log("test", userData, eventTitle);
+        // console.log("test", userData, eventTitle);
         try {
           await sendConfMail({
             user: userData,
@@ -442,15 +442,11 @@ const EventPage: React.FC = () => {
   const handleInterested = async () => {
     // handle interested button click
     const userID = user?.id;
-    if(isInterested===false){
-      setIsInterested(true);
-      console.log("value set as true");
-    }
-    else{
-      setIsInterested(false);
-      console.log("value set as false");
-    }
-    console.log("isInterested:",isInterested);
+    const updatedInterestedStatus = !isInterested;
+    console.log("old value: ", isInterested);
+    setIsInterested(updatedInterestedStatus);
+    console.log("new value of isInterested: ", updatedInterestedStatus);
+
     const response = await fetch(`/api/event/interested`, {
       method: "POST",
       headers: {
@@ -459,13 +455,12 @@ const EventPage: React.FC = () => {
       body: JSON.stringify({
         userID: userID,
         eventID: eventId,
-        interested: isInterested,
+        interested: updatedInterestedStatus,
       }),
     });
     if (response.ok) {
       console.log("liked");
-    }
-    else{
+    } else {
       setIsInterested(!isInterested);
       toast.error("Error in liking event");
     }
@@ -478,9 +473,9 @@ const EventPage: React.FC = () => {
   const [bang_loading, bang_setLoading] = useState<boolean>(false);
 
   const pathname = usePathname();
-  console.log(pathname);
+  // console.log(pathname);
   const eventId = pathname.split("/").pop();
-  console.log("slug: ", eventId);
+  // console.log("slug: ", eventId);
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -495,8 +490,8 @@ const EventPage: React.FC = () => {
           body: JSON.stringify({ userID: userID }),
         });
         const data = await response.json();
-        console.log("Data: ", data.data[0]);
-        console.log("rs", response.status);
+        // console.log("Data: ", data.data[0]);
+        // console.log("rs", response.status);
         if (response.status === 404 || response.status === 400) {
           notFound();
         }
@@ -505,6 +500,10 @@ const EventPage: React.FC = () => {
           // setEventData(data.data[0]);
           const fetchedEventData = data.data[0];
           const fetchedEventInterest = data.isInterested;
+          console.log(
+            "from backend in frontend: ",
+            typeof fetchedEventInterest
+          );
           Object.keys(fetchedEventData).forEach((key) => {
             event[key] = fetchedEventData[key];
           });
@@ -536,34 +535,6 @@ const EventPage: React.FC = () => {
 
     fetchEventData();
   }, []);
-
-  // useEffect(() => {
-  //   const fetchOrganizerDetails = async () => {
-  //     try {
-  //       const response = await fetch(`/api/getorganizer/${organizerId}`);
-  //       const data = await response.json();
-
-  //       if (data.success) {
-  //         const fetchedOwnerData = data.data[0];
-  //         (Object.keys(organizer) as (keyof Organizer)[]).forEach((key) => {
-  //           // Check if the fetchedOwnerData has the same key
-  //           if (key in fetchedOwnerData) {
-  //             organizer[key] =
-  //               fetchedOwnerData[key as keyof typeof fetchedOwnerData];
-  //           }
-  //         });
-  //       } else {
-  //         setOrgError("Failed to load organizer details");
-  //       }
-  //     } catch (err) {
-  //       setOrgError((err as Error).message);
-  //     } finally {
-  //       setOrgLoading(false);
-  //     }
-  //   };
-
-  //   fetchOrganizerDetails();
-  // }, [event.ownerId]);
 
   return (
     <>
@@ -629,9 +600,8 @@ const EventPage: React.FC = () => {
                   size="sm"
                   className="flex items-center"
                   onClick={handleInterested}
-                  
                 >
-                  {isInterested? "liked":"dislike"}
+                  {isInterested ? "liked" : "dislike"}
                   <StarIcon className="h-4 w-4 mr-1" />I am Interested
                 </Button>
                 <Popover>
@@ -1025,9 +995,18 @@ const EventPage: React.FC = () => {
                     <ShareCard event={event} />
                   </PopoverContent>
                 </Popover>
-                <Button variant="outline" className="flex-1">
-                  <StarIcon className="h-5 w-5 mr-2" />I am interested
+                <Button
+                  variant="outline"
+                  // size="sm"
+                  className="flex-1"
+                  onClick={handleInterested}
+                >
+                  {isInterested ? "liked" : "dislike"}
+                  <StarIcon className="h-4 w-4 mr-1" />I am Interested
                 </Button>
+                {/* <Button variant="outline" className="flex-1">
+                  <StarIcon className="h-5 w-5 mr-2" />I am interested
+                </Button> */}
               </div>
               {/* </div> */}
 

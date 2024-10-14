@@ -56,7 +56,7 @@ const ClubCard: React.FC<{ club: Club }> = ({ club }) => {
           <DialogDescription className="mt-4">{club.description}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <Button onClick={() => router.push(`/club/${club._id}`)}>Know More about Club</Button>
+          <Button onClick={() => router.push(`/club/${club.clerkId}`)}>Know More about Club</Button>
         </div>
         <DialogFooter className="text-xs text-muted-foreground mr-auto ml-auto">
           © Atomicity Events Inc. | All Rights Reserved | 2024-2025

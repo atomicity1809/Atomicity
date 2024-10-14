@@ -5,38 +5,31 @@ import mongoose from "mongoose";
 
 // Helper function for error responses
 const createErrorResponse = (message: string, status: number) => {
-  return NextResponse.json(
-    { success: false, message },
-    { status }
-  );
+  return NextResponse.json({ success: false, message }, { status });
 };
 
 // Helper function for success responses
 const createSuccessResponse = (data: any, status: number) => {
-  return NextResponse.json(
-    { success: true, data },
-    { status }
-  );
+  return NextResponse.json({ success: true, data }, { status });
 };
 
 // GET: Fetch Admin details using MongoDB _id
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { slug: string } }
+) {
   await connectToDB();
 
   const adminId = params.slug; // The slug now represents the MongoDB _id
 
-  // Basic validation: Check if adminId is a valid MongoDB ObjectId
-  if (!mongoose.Types.ObjectId.isValid(adminId)) {
-    return createErrorResponse("Invalid admin ID", 400);
-  }
-
   try {
-    // Fetch admin details from the database using the MongoDB _id
-    const adminDetails = await Admin.findById(adminId);
+    // Fetch admin details from the database using the clerk id
+    const adminDetails = await Admin.find({ clerkId: adminId });
+    // console.log("goot admin details: ",adminDetails);
 
     // Check if admin details were found
     if (!adminDetails) {
-      return createErrorResponse("Admin not found", 404);
+      return createErrorResponse("No data available for this club.", 404);
     }
 
     // Respond with the fetched admin details
@@ -48,7 +41,10 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 }
 
 // PUT: Update Admin details using MongoDB _id
-export async function PUT(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { slug: string } }
+) {
   await connectToDB();
 
   const adminId = params.slug; // The slug represents the MongoDB _id
@@ -86,7 +82,10 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
 
     // Specific error handling for validation errors
     if ((error as Error).name === "ValidationError") {
-      return createErrorResponse("Validation failed for the provided data", 400);
+      return createErrorResponse(
+        "Validation failed for the provided data",
+        400
+      );
     }
 
     return createErrorResponse("Internal server error", 500);
