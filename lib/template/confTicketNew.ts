@@ -325,7 +325,7 @@ export const confTicketNew = `
 															<td class="pad">
 																<div style="color:#ebfaff;direction:ltr;font-family:Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:120%;text-align:center;mso-line-height-alt:19.2px;">
 																<img
-																src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{confirmation_number}}" 
+																src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{confirmation_number}},{{userId}}" 
 																style="display: block; margin: 0 auto; border: 1px solid #ddd; width: 84px; height: 84px;"
 																alt="QR Code">
 																</div>

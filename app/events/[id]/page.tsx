@@ -329,6 +329,7 @@ const EventPage: React.FC = () => {
             eventImg,
             eventOrgName,
             current_date,
+            userID
           });
           console.log("Confirmation email sent");
           // toast.success("Ticket Sent to Mail !!");
