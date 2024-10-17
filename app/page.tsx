@@ -12,14 +12,14 @@ import UserJourney from "./_components/UserJourney";
 export default function Home() {
   return (
     <div className="main-home-page">
-      <Navbar/>
+      {/* <Navbar/> */}
       <Hero/>
       <UserJourney/>
       <ScrollingLogos/>
       {/* <AdditionalFeatures/> */}
       {/* <EventList/> */}
       {/* <TestimonialSection/> */}
-      <Footer/>
+      {/* <Footer/> */}
     </div>
   );
 }

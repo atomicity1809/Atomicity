@@ -7,7 +7,7 @@ import Image from 'next/image';
 const Footer = () => {
   return (
     <footer className="bg-black  text-gray-300">
-    <div className=' bg-white flex justify-center'>
+    {/* <div className=' bg-white flex justify-center'>
         <Image
             src="/imgs/atomicity_banner.png"
             alt='atomicity logo'
@@ -15,7 +15,7 @@ const Footer = () => {
             width={400}
             className=' object-contain'
         />
-    </div>
+    </div> */}
       <div className="max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:py-2 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="grid grid-cols-2 gap-8 xl:col-span-2">

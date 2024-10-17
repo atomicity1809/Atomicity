@@ -37,6 +37,11 @@ import {
   CheckIcon,
   ChevronsUpDown,
   X,
+  HeartIcon,
+  MapIcon,
+  CheckCheck,
+  Heart,
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -60,7 +65,9 @@ import ClubEvents from "./_tabs/ClubEvents";
 import CalendarEvents from "./_tabs/CalendarEvents";
 import Sidebar from "./Sidebar";
 import MainContent from "./MainContent";
+import Navbar from "../_components/Navbar"
 import useSWR from "swr";
+// ... (imports remain the same)
 
 interface Event {
   _id: string;
@@ -82,6 +89,12 @@ interface Event {
   ownerLogo: string;
 }
 
+interface EventCardProps {
+  event: Event;
+  isRegistered: boolean;
+  isInterested: boolean;
+}
+
 const clubCategories = [
   { value: "popular", label: "Popular" },
   { value: "technical", label: "Technical" },
@@ -100,70 +113,91 @@ const institutes = [
   { value: "ild", label: "ILD" },
 ];
 
-const EventCard: React.FC<{ event: Event }> = ({ event }): JSX.Element => {
+const EventCard: React.FC<EventCardProps> = ({ event, isRegistered, isInterested }) => {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden relative group">
       <CardContent className="p-0 relative">
-        <Image
+        <img
           src={event.coverImg}
           alt={event.title}
-          width={400}
-          height={200}
           className="w-full h-48 object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-100" />
+        
+        {/* Floating Status Badges */}
+        <div className="absolute top-4 right-4 flex flex-col gap-3">
+          {isRegistered && (
+            <div className="relative">
+              <div className="absolute inset-0 bg-white rounded-full animate-ping opacity-75" />
+              <div className="relative bg-white text-white p-2 rounded-full transform hover:scale-110 transition-transform cursor-pointer shadow-lg backdrop-blur-sm">
+                <CheckCheck className="w-5 h-5 text-black" />
+              </div>
+              {/* <div className="absolute -right-2 -top-2 w-3 h-3 bg-white rounded-full" /> */}
+            </div>
+          )}
+          
+          {isInterested && (
+            <div className="relative">
+              <div className="relative bg-purple-200 text-purple-500 p-2 rounded-full transform hover:scale-110 transition-transform cursor-pointer shadow-lg backdrop-blur-sm hover:animate-pulse">
+                <Heart className="w-5 h-5 fill-current" />
+              </div>
+              {/* <div className="absolute -left-2 -bottom-1 w-2 h-2 bg-purple-500 rounded-full" /> */}
+              {/* <div className="absolute -right-1 -top-1 w-2 h-2 bg-purple-500 rounded-full" /> */}
+            </div>
+          )}
+        </div>
+
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h3 className="text-xl font-semibold mb-1 truncate">{event.title}</h3>
-          <p className="text-sm opacity-80 mb-2 truncate">{event.subtitle}</p>
+          <h3 className="text-2xl font-semibold mb-1 truncate">{event.title}</h3>
           <div className="flex flex-wrap gap-2 text-xs">
-            <span className="flex items-center bg-white bg-opacity-20 rounded px-2 py-1">
-              <CalendarIcon className="w-3 h-3 mr-1" />
+            <span className="flex items-center backdrop-blur-sm bg-white/30 rounded-full px-3 py-1 transition-colors hover:bg-white/40">
+              <Calendar className="w-3 h-3 mr-1" />
               {new Date(event.date).toLocaleDateString()}
-            </span>
-            <span className="flex items-center bg-white bg-opacity-20 rounded px-2 py-1">
-              <ClockIcon className="w-3 h-3 mr-1" />
-              {event.time}
-            </span>
-            <span className="flex items-center bg-white bg-opacity-20 rounded px-2 py-1">
-              <MapPinIcon className="w-3 h-3 mr-1" />
-              {event.location}
             </span>
           </div>
         </div>
       </CardContent>
+      
       <div className="p-4">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-2">
             <Avatar>
-              <AvatarImage
-                src={event.ownerLogo}
-                alt={event.clubName}
-              />
+              <AvatarImage src={event.ownerLogo} alt={event.clubName} />
               <AvatarFallback>{event.clubName}</AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium">{event.ownerName}</span>
           </div>
         </div>
+        
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <span className="flex items-center text-sm text-muted-foreground">
-              {/* <DollarSignIcon className="w-4 h-4 mr-1" /> */}
+          <div className="flex items-center space-x-3">
+            <span className="flex items-center text-sm font-medium px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
               {event.fees === 0 ? "Free" : `₹${event.fees}`}
             </span>
             <span className="flex items-center text-sm text-muted-foreground">
-              <UserIcon className="w-4 h-4 mr-1" />
+              <User className="w-4 h-4 mr-1" />
               {event.registeredUsers.length}
             </span>
           </div>
+          
           {event.isAvailableToReg ? (
             <Link href={`/events/${event._id}`} prefetch>
-              <Button variant="outline" size="sm">
-                Book Now
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="transition-all hover:shadow-md hover:translate-y-[-2px]"
+              >
+                {isRegistered ? "View Details" : "Book Now"}
               </Button>
             </Link>
           ) : (
-            <Button variant="outline" size="sm" disabled>
-              Closed
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled 
+              className="opacity-50"
+            >
+              Registration Closed
             </Button>
           )}
         </div>
@@ -195,28 +229,24 @@ const LoadingSkeleton = () => (
   </Card>
 );
 
-// main component
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   const data = await response.json();
   if (!data.success) {
-    throw new Error("Failed to load events");
+    throw new Error("Failed to load data");
   }
   return data.data;
 };
+
 const EventsPage: React.FC = () => {
-  // const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  // const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedInstitutes, setSelectedInstitutes] = useState<string[]>([]);
   const { isSignedIn, user } = useUser();
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
-  const [isLoadingEvents, setIsLoadingEvents] = useState<boolean>(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  // const [events, setEvents] = useState([]);
+  const [userEvents, setUserEvents] = useState<{ registeredEvents: string[], interestedEvents: string[] }>({ registeredEvents: [], interestedEvents: [] });
 
   const {
     data: events,
@@ -225,35 +255,25 @@ const EventsPage: React.FC = () => {
   } = useSWR<Event[]>("/api/event", fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
-    refreshInterval: 60000, // Refresh every 60 seconds
-    dedupingInterval: 60000, // Dedupe requests within 60 seconds
+    refreshInterval: 60000,
+    dedupingInterval: 60000,
   });
+
+  const { data: userData, error: userError } = useSWR(
+    isSignedIn ? `/api/user/${user?.id}/event` : null,
+    fetcher
+  );
+
+  useEffect(() => {
+    if (userData) {
+      setUserEvents(userData);
+      console.log(userData);
+    }
+  }, [userData]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-
-  // useEffect(() => {
-  //   const fetchEvents = async () => {
-  //     try {
-  //       const response = await fetch("/api/event");
-  //       const data = await response.json();
-
-  //       if (data.success) {
-  //         setEvents(data.data);
-  //       } else {
-  //         setError("Failed to load events");
-  //       }
-  //     } catch (err) {
-  //       setError((err as Error).message);
-  //     } finally {
-  //       // setLoading(false);
-  //       setIsLoadingEvents(false);
-  //     }
-  //   };
-
-  //   fetchEvents();
-  // }, []);
 
   const filteredEvents =
     events?.filter(
@@ -341,6 +361,35 @@ const EventsPage: React.FC = () => {
     );
   };
 
+  const renderEventsList = () => {
+    if (isValidating && !events) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, index) => (
+            <LoadingSkeleton key={index} />
+          ))}
+        </div>
+      );
+    }
+
+    if (error) {
+      return <div className="text-red-500">Failed to load events</div>;
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredEvents.map((event) => (
+          <EventCard 
+            key={event._id} 
+            event={event} 
+            isRegistered={userEvents.registeredEvents.includes(event._id)}
+            isInterested={userEvents.interestedEvents.includes(event._id)}
+          />
+        ))}
+      </div>
+    );
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "events":
@@ -363,72 +412,17 @@ const EventsPage: React.FC = () => {
     }
   };
 
-  const renderEventsList = () => {
-    if (isValidating && !events) {
-      return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, index) => (
-            <LoadingSkeleton key={index} />
-          ))}
-        </div>
-      );
-    }
-
-    if (error) {
-      return <div className="text-red-500">Failed to load events</div>;
-    }
-
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredEvents.map((event) => (
-          <EventCard key={event._id} event={event} />
-        ))}
-      </div>
-    );
-  };
-
-  // if (loading) {
-  //   return (
-  //     <div className="flex h-screen bg-background">
-  //       {/* Sidebar skeleton */}
-  //       <div className="w-64 border-r p-4">
-  //         <Skeleton className="h-8 w-32 mb-4" />
-  //         <Skeleton className="h-4 w-full mb-2" />
-  //         <Skeleton className="h-4 w-3/4 mb-2" />
-  //         <Skeleton className="h-4 w-1/2 mb-4" />
-  //         {/* Repeat for other sidebar items */}
-  //       </div>
-
-  //       {/* Main content skeleton */}
-  //       <div className="flex-1 p-6">
-  //         <div className="flex justify-between items-center mb-6">
-  //           <Skeleton className="h-10 w-64" />
-  //           <div className="flex space-x-2">
-  //             <Skeleton className="h-10 w-40" />
-  //             <Skeleton className="h-10 w-40" />
-  //           </div>
-  //         </div>
-  //         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-  //           {[...Array(6)].map((_, index) => (
-  //             <LoadingSkeleton key={index} />
-  //           ))}
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen text-red-500">
-        {error}
+        Failed to load events. Please try again later.
       </div>
     );
   }
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar */}
+      {/* <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} /> */}
       <Sidebar
         sidebarOpen={sidebarOpen}
         toggleSidebar={toggleSidebar}
@@ -437,8 +431,6 @@ const EventsPage: React.FC = () => {
         selectedInstitutes={selectedInstitutes}
         handleInstituteChange={handleInstituteChange}
       />
-
-      {/* Main Content */}
       <MainContent
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -446,6 +438,7 @@ const EventsPage: React.FC = () => {
         setSearchTerm={setSearchTerm}
         toggleSidebar={toggleSidebar}
         renderTabContent={renderTabContent}
+        // UserMenu={UserMenu}
       />
     </div>
   );

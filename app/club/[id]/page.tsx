@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Facebook, Twitter, Instagram, Linkedin, Globe, Mail, Radio, ArrowLeft } from "lucide-react";
-import { toast } from "sonner"; // Assuming you're using toast for notifications
+import { toast } from "sonner";
 
 interface ClubData {
   clubName: string;
@@ -33,14 +33,19 @@ const getSocialIcon = (link: string) => {
   return <Radio className="h-4 w-4" />;
 };
 
+// Skeleton Loader Component
+const Skeleton = ({ className }: { className: string }) => {
+  return <div className={`animate-pulse bg-gray-300 ${className}`} />;
+};
+
 const ClubProfile: React.FC = () => {
   const router = useRouter();
   const [clubData, setClubData] = useState<ClubData | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    const path = window.location.pathname; // Get the path from the window object
-    const id = path.split("/club/")[1]; // Extract the ID from the URL
+    const path = window.location.pathname;
+    const id = path.split("/club/")[1];
 
     const fetchClubData = async () => {
       try {
@@ -49,7 +54,6 @@ const ClubProfile: React.FC = () => {
           const dataArray = await response.json();
           const data = dataArray.data[0];
           
-          console.log("got response: ",data);
           setClubData({
             coverImage: data.coverImage || "",
             bio: data.bio || "",
@@ -76,10 +80,46 @@ const ClubProfile: React.FC = () => {
     };
 
     fetchClubData();
-  }, []); // Run only once when the component mounts
+  }, []);
 
   if (dataLoading) {
-    return <p>Loading...</p>; // or a spinner/loading indicator
+    return (
+      <div className="bg-gray-100">
+        <div className="relative h-64 md:h-80">
+          <Skeleton className="w-full h-full" />
+        </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center space-x-6">
+                <Skeleton className="h-24 w-24 rounded-full" />
+                <div>
+                  <Skeleton className="h-6 w-48" />
+                  <Skeleton className="h-4 w-32 mt-2" />
+                </div>
+              </div>
+              <div className="mt-6">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4 mt-2" />
+              </div>
+              <div className="mt-6 flex space-x-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+              </div>
+            </div>
+            <Tabs defaultValue="about" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!clubData) {
@@ -88,7 +128,6 @@ const ClubProfile: React.FC = () => {
 
   return (
     <div className="bg-gray-100">
-      {/* Cover Image */}
       <div className="relative h-64 md:h-80">
         <Image
           src={clubData.coverImage}
@@ -187,64 +226,56 @@ const ClubProfile: React.FC = () => {
 
             {/* Events Tab */}
             <TabsContent value="events">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Upcoming Events</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {clubData.events.length > 0 ? (
-                    clubData.events.map((event, index) => (
-                      <div key={index} className="mb-4">
-                        <h3 className="font-bold text-lg">{event.title}</h3>
+              <div className="space-y-4">
+                {clubData.events.length > 0 ? (
+                  clubData.events.map((event, index) => (
+                    <Card key={index}>
+                      <CardHeader>
+                        <CardTitle>{event.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
                         <p>{event.description}</p>
-                        <p className="text-gray-500">{new Date(event.date).toLocaleDateString()}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No events available at the moment.</p>
-                  )}
-                </CardContent>
-              </Card>
+                        <p className="text-sm text-gray-600">Date: {event.date}</p>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <p>No events available.</p>
+                )}
+              </div>
             </TabsContent>
 
             {/* Members Tab */}
             <TabsContent value="members">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Club Members</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {clubData.members.length > 0 ? (
-                    clubData.members.map((member, index) => (
-                      <div key={index} className="mb-4">
-                        <p className="font-bold">{member.name}</p>
-                        <p className="text-gray-600">{member.role}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No member information available.</p>
-                  )}
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                {clubData.members.length > 0 ? (
+                  clubData.members.map((member, index) => (
+                    <Card key={index}>
+                      <CardHeader>
+                        <CardTitle>{member.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p>Role: {member.role}</p>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <p>No members available.</p>
+                )}
+              </div>
             </TabsContent>
 
             {/* Join Us Tab */}
             <TabsContent value="join">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Join Our Club</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="mb-4">Interested in joining {clubData.clubName}? Fill out our membership form to get started!</p>
-                  {clubData.membershipForm && (
-                    <Button asChild>
-                      <a href={clubData.membershipForm} target="_blank" rel="noopener noreferrer">
-                        Open Membership Form
-                      </a>
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+              {clubData.membershipForm ? (
+                <Button variant="outline" asChild>
+                  <a href={clubData.membershipForm} target="_blank" rel="noopener noreferrer">
+                    Join {clubData.clubName}
+                  </a>
+                </Button>
+              ) : (
+                <p>Membership form not available.</p>
+              )}
             </TabsContent>
           </Tabs>
         </div>

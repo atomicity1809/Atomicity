@@ -73,6 +73,7 @@ import {
 import Admin from "@/models/adminSchema";
 import Head from "next/head";
 import NotFound from "@/app/not-found";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MDPreview = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
@@ -175,9 +176,16 @@ const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
             <span>{event.time}</span>
           </div>
           <div className="flex items-center">
-            <MapPinIcon className="h-4 w-4 mr-2" />
+          <MapPinIcon className="h-4 w-4 mr-2" />
+          {event.location && event.location.trim() !== "" ? (
             <span>{event.location}</span>
+          ) : (
+            <span className="text-purple-500">Online Event</span>
+          )}
           </div>
+          
+
+
         </div>
         <div className="mt-4">
           <p className="text-sm mb-2">Share this event:</p>
@@ -392,8 +400,12 @@ const EventPage: React.FC = () => {
                 <span>{event.time}</span>
               </div>
               <div className="flex items-center">
-                <MapPinIcon className="h-5 w-5 text-purple-500 mr-3" />
-                <span>{event.location}</span>
+                <MapPinIcon className="h-4 w-4 mr-2" />
+                  {event.location && event.location.trim() !== "" ? (
+                    <span>{event.location}</span>
+                  ) : (
+                    <span className="italic text-blue-500">Online Event</span>
+                )}
               </div>
               <div className="flex items-center">
                 <CreditCardIcon className="h-5 w-5 text-purple-500 mr-3" />
@@ -596,15 +608,42 @@ const EventPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center"
+              <motion.div
+                className="flex items-center space-x-2 rounded-lg px-3 py-1 border border-purple-200"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <motion.button
+                  className="flex items-center justify-center w-8 h-8 rounded-full focus:outline-none"
                   onClick={handleInterested}
+                  whileTap={{ scale: 0.9 }}
                 >
-                  {isInterested ? "liked" : "dislike"}
-                  <StarIcon className="h-4 w-4 mr-1" />I am Interested
-                </Button>
+                  <motion.div
+                    className="text-black"
+                    animate={{ 
+                      scale: isInterested ? [1, 1.2, 1] : 1,
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Heart
+                      className={`w-5 h-5 transition-colors duration-300 ${
+                        isInterested ? 'text-purple-500 fill-current' : 'text-black'
+                      }`}
+                    />
+                  </motion.div>
+                </motion.button>
+                
+                <motion.span
+                  className="text-xs font-medium"
+                  animate={{ 
+                    color: isInterested ? '#8B5CF6' : '#000000', // purple-500 when interested, black when not
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isInterested ? "Interested" : "I am Interested"}
+                </motion.span>
+              </motion.div>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="flex-1">
@@ -678,8 +717,12 @@ const EventPage: React.FC = () => {
                   <span>{event.time}</span>
                 </div>
                 <div className="flex items-center">
-                  <MapPinIcon className="h-5 w-5 mr-2" />
-                  <span>{event.location}</span>
+                  <MapPinIcon className="h-4 w-4 mr-2" />
+                    {event.location && event.location.trim() !== "" ? (
+                      <span>{event.location}</span>
+                    ) : (
+                      <span className="text-white">Online Event</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -703,21 +746,21 @@ const EventPage: React.FC = () => {
           <div className="grid grid-cols-3 gap-8">
             {/* Left Column - Event Details */}
             <div className="col-span-2">
-              <Tabs defaultValue="about" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="about">About</TabsTrigger>
+              <Tabs defaultValue="details" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  {/* <TabsTrigger value="about">About</TabsTrigger> */}
                   <TabsTrigger value="details">Event Details</TabsTrigger>
                   <TabsTrigger value="organizer">Organizer</TabsTrigger>
                 </TabsList>
                 <TabsContent value="about">
-                  <Card>
+                  {/* <Card>
                     <CardHeader>
                       <CardTitle>About the Event</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p>{event.description}</p>
                     </CardContent>
-                  </Card>
+                  </Card> */}
                 </TabsContent>
                 <TabsContent value="details">
                   <Card>
@@ -743,8 +786,12 @@ const EventPage: React.FC = () => {
 
                         {event.mode !== "online" && (
                           <div className="flex items-center">
-                            <MapPinIcon className="h-5 w-5 mr-2 text-purple-600" />
-                            <span>{event.location}</span>
+                            <MapPinIcon className="h-4 w-4 mr-2" />
+                              {event.location && event.location.trim() !== "" ? (
+                                <span>{event.location}</span>
+                              ) : (
+                                <span className="text-white">Online Event</span>
+                              )}
                           </div>
                         )}
                         <div className="flex items-center">
@@ -775,7 +822,7 @@ const EventPage: React.FC = () => {
                         <div className="relative group">
                           <a
                             href={`/club/${organizerId}`}
-                            className="text-lg font-semibold text-blue-600 hover:text-blue-800 transition-colors duration-300 flex items-center"
+                            className="text-lg font-semibold text-purple-500 hover:text-purple-800 transition-colors duration-300 flex items-center"
                             rel="noopener noreferrer"
                           >
                             {event?.ownerName}
@@ -996,18 +1043,44 @@ const EventPage: React.FC = () => {
                     <ShareCard event={event} />
                   </PopoverContent>
                 </Popover>
-                <Button
-                  variant="outline"
-                  // size="sm"
-                  className="flex-1"
-                  onClick={handleInterested}
+
+                <motion.div
+                  className="flex items-center space-x-2 rounded-lg px-3 py-1 border border-purple-200"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  {isInterested ? "liked" : "dislike"}
-                  <StarIcon className="h-4 w-4 mr-1" />I am Interested
-                </Button>
-                {/* <Button variant="outline" className="flex-1">
-                  <StarIcon className="h-5 w-5 mr-2" />I am interested
-                </Button> */}
+                  <motion.button
+                    className="flex items-center justify-center w-8 h-8 rounded-full focus:outline-none"
+                    onClick={handleInterested}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <motion.div
+                      className="text-black"
+                      animate={{ 
+                        scale: isInterested ? [1, 1.2, 1] : 1,
+                      }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Heart
+                        className={`w-5 h-5 transition-colors duration-300 ${
+                          isInterested ? 'text-purple-500 fill-current' : 'text-black'
+                        }`}
+                      />
+                    </motion.div>
+                  </motion.button>
+                  
+                  <motion.span
+                    className="text-xs font-medium"
+                    animate={{ 
+                      color: isInterested ? '#8B5CF6' : '#000000', // purple-500 when interested, black when not
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isInterested ? "Interested" : "I am Interested"}
+                  </motion.span>
+                </motion.div>
+
               </div>
               {/* </div> */}
 
