@@ -314,7 +314,8 @@ const EventPage: React.FC = () => {
         const userName = user?.fullName || "Default Name";
         const eventTitle = event.title || "Default Event Title";
         const eventTime = event.time.toString();
-        const eventLocation = event.location;
+        const eventLocation = event.location && event.location.trim() !== "" ?  event.location : "Online";
+
         const eventImg = event.coverImg;
         const eventOrgName = "Rare Society of Cultural Events";
         const current_date = new Date().toString();
