@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -7,19 +8,21 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Clock,
-  BarChart2,
+  Compass,
+  CalendarClock,
   Radio,
-  ListMusic,
-  Music,
-  User,
   ChevronsUpDown,
   X,
   GraduationCap,
-  Tags
+  Tags,
+  HeartPulse,
+  CheckCircle2,
+  BookOpenCheck,
+  CheckCheck,
+  Heart
 } from "lucide-react";
 
 interface SidebarProps {
@@ -29,6 +32,8 @@ interface SidebarProps {
   handleCategoryChange: (value: string) => void;
   selectedInstitutes: string[];
   handleInstituteChange: (value: string) => void;
+  onViewChange: (view: string) => void;
+  currentView: string;
 }
 
 const clubCategories = [
@@ -56,20 +61,33 @@ const Sidebar: React.FC<SidebarProps> = ({
   handleCategoryChange,
   selectedInstitutes,
   handleInstituteChange,
+  onViewChange,
+  currentView,
 }) => {
+  const NavButton = ({ view, icon: Icon, label }: { view: string; icon: any; label: string }) => (
+    <Button 
+      variant="ghost" 
+      className={`w-full justify-start h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700 transition-all duration-300
+        ${currentView === view ? 'bg-purple-500/10 text-purple-700 font-medium' : ''}`}
+      onClick={() => onViewChange(view)}
+    >
+      <div className="flex items-center">
+        <div className={`mr-2 transition-transform duration-300 ${currentView === view ? 'scale-110' : ''}`}>
+          <Icon className={`h-4 w-4 ${currentView === view ? 'animate-pulse' : ''}`} />
+        </div>
+        <span className="text-sm">{label}</span>
+      </div>
+    </Button>
+  );
+
   return (
     <div
       className={`${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } fixed inset-y-0 left-0 z-50 w-60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg p-4 overflow-y-auto transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:w-60`}
+      } fixed inset-y-0 left-0 z-50 w-64 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 
+      shadow-lg p-4 overflow-y-auto transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:w-64`}
     >
       <div className="flex items-center justify-between mb-6">
-        {/* <Link href="/" className="flex items-center space-x-2">
-          <div className="bg-purple-500/10 px-3 py-1.5 rounded-md">
-            <span className="font-light text-purple-700">Atomi</span>
-            <span className="font-bold text-purple-700">City</span>
-          </div>
-        </Link> */}
         <Button 
           variant="ghost" 
           size="icon" 
@@ -82,58 +100,59 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       <div className="space-y-6">
         <div className="space-y-2">
-          <div className="text-xs font-semibold text-purple-700 px-2">DISCOVER</div>
+          <div className="text-xs font-semibold text-purple-700 px-2 mb-3">DISCOVER</div>
           <nav className="space-y-1">
-            <Button variant="ghost" className="w-full justify-start h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700">
-              <Clock className="mr-2 h-4 w-4" /> 
-              <span className="text-sm">Upcoming</span>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700">
-              <BarChart2 className="mr-2 h-4 w-4" /> 
-              <span className="text-sm">Browse</span>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700">
-              <Radio className="mr-2 h-4 w-4" /> 
-              <span className="text-sm">Live</span>
-            </Button>
+            <NavButton 
+              view="browse" 
+              icon={Compass}
+              label="Browse All" 
+            />
+            <NavButton 
+              view="upcoming" 
+              icon={CalendarClock}
+              label="Upcoming" 
+            />
+            <NavButton 
+              view="live" 
+              icon={Radio}
+              label="Live Now" 
+            />
           </nav>
         </div>
 
         <div className="space-y-2">
-          <div className="text-xs font-semibold text-purple-700 px-2">MY EVENTS</div>
+          <div className="text-xs font-semibold text-purple-700 px-2 mb-3">MY EVENTS</div>
           <nav className="space-y-1">
-            <Button variant="ghost" className="w-full justify-start h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700">
-              <ListMusic className="mr-2 h-4 w-4" /> 
-              <span className="text-sm">Registered</span>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700">
-              <Music className="mr-2 h-4 w-4" /> 
-              <span className="text-sm">Favorites</span>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700">
-              <User className="mr-2 h-4 w-4" /> 
-              <span className="text-sm">My Club</span>
-            </Button>
+            <NavButton 
+              view="registered" 
+              icon={CheckCheck}
+              label="Registered" 
+            />
+            <NavButton 
+              view="interested" 
+              icon={Heart}
+              label="Interested" 
+            />
           </nav>
         </div>
 
         <div className="space-y-2">
-          <div className="text-xs font-semibold text-purple-700 px-2">FILTERS</div>
+          <div className="text-xs font-semibold text-purple-700 px-2 mb-3">FILTERS</div>
           <div className="space-y-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="w-full justify-between h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700"
+                  className="w-full justify-between h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700 group"
                 >
                   <div className="flex items-center">
-                    <Tags className="mr-2 h-4 w-4" />
+                    <Tags className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
                     <span className="text-sm">Categories</span>
                   </div>
-                  <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                  <ChevronsUpDown className="h-4 w-4 opacity-50 group-hover:translate-y-[1px] transition-transform duration-200" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
+              <DropdownMenuContent className="w-56" align="start">
                 {clubCategories.map((category) => (
                   <DropdownMenuItem key={category.value} className="flex items-center space-x-2">
                     <Checkbox
@@ -151,16 +170,16 @@ const Sidebar: React.FC<SidebarProps> = ({
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="w-full justify-between h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700"
+                  className="w-full justify-between h-9 px-2 hover:bg-purple-500/10 hover:text-purple-700 group"
                 >
                   <div className="flex items-center">
-                    <GraduationCap className="mr-2 h-4 w-4" />
+                    <GraduationCap className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
                     <span className="text-sm">Institutes</span>
                   </div>
-                  <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                  <ChevronsUpDown className="h-4 w-4 opacity-50 group-hover:translate-y-[1px] transition-transform duration-200" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
+              <DropdownMenuContent className="w-56" align="start">
                 {institutes.map((institute) => (
                   <DropdownMenuItem key={institute.value} className="flex items-center space-x-2">
                     <Checkbox

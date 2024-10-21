@@ -48,7 +48,7 @@ const journey = [
 
 const UserJourney: React.FC = () => {
   return (
-    <section className="py-20 bg-gradient-to-b from-purple-200 to-purple-500">
+    <section className="py-8 bg-gradient-to-b from-purple-200 to-purple-500">
       <div className="container mx-auto px-4">
         <h2 className="text-6xl font-bold text-center text-purple-500 mb-12">
           Your Journey to <span className='text-white'>Unforgettable Events</span>

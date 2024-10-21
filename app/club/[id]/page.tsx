@@ -53,7 +53,7 @@ const ClubProfile: React.FC = () => {
         if (response.ok) {
           const dataArray = await response.json();
           const data = dataArray.data[0];
-          
+          console.log(data);
           setClubData({
             coverImage: data.coverImage || "",
             bio: data.bio || "",

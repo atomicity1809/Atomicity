@@ -22,7 +22,7 @@ const clubLogos = [...clubs, ...clubs];
 
 const ScrollingLogos = () => {
   return (
-    <div className="overflow-hidden bg-purple-500 py-10 pb-9">
+    <div className="overflow-hidden bg-purple-500 py-1 pb-9">
       <h2 className="text-7xl text-white text-center mb-8">Clubs 
         <span className=' font-thin ml-2'>
             <i>@</i>

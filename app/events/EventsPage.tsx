@@ -247,6 +247,7 @@ const EventsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("events");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userEvents, setUserEvents] = useState<{ registeredEvents: string[], interestedEvents: string[] }>({ registeredEvents: [], interestedEvents: [] });
+  const [currentView, setCurrentView] = useState<string>('browse');
 
   const {
     data: events,
@@ -275,15 +276,57 @@ const EventsPage: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const filteredEvents =
-    events?.filter(
-      (event) =>
+  const filterEventsByView = (events: Event[]) => {
+    if (!events) return [];
+    
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    switch (currentView) {
+      case 'upcoming':
+        return events.filter(event => {
+          const eventDate = new Date(event.date);
+          // Remove time component for date comparison
+          const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+          return eventDateOnly > today;
+        });
+        
+      case 'live':
+        return events.filter(event => {
+          const eventDate = new Date(event.date);
+          // Compare only the date components
+          return eventDate.getFullYear() === today.getFullYear() &&
+                 eventDate.getMonth() === today.getMonth() &&
+                 eventDate.getDate() === today.getDate();
+        });
+        
+      case 'registered':
+        return events.filter(event => 
+          userEvents?.registeredEvents?.includes(event._id)
+        );
+        
+      case 'interested':
+        return events.filter(event => 
+          userEvents?.interestedEvents?.includes(event._id)
+        );
+        
+      case 'browse':
+      default:
+        return events;
+    }
+  };
+
+  // Apply search and category filters after view filtering
+  const filteredEvents = events
+    ? filterEventsByView(events).filter(event =>
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (selectedCategories.length === 0 ||
-          selectedCategories.includes(event.eventType)) &&
-        (selectedInstitutes.length === 0 ||
-          selectedInstitutes.includes(event.clubName))
-    ) ?? [];
+        (selectedCategories.length === 0 || selectedCategories.includes(event.eventType)) &&
+        (selectedInstitutes.length === 0 || selectedInstitutes.includes(event.clubName))
+      )
+    : [];
+
+
+  const finalFilteredEvents = filterEventsByView(filteredEvents);
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategories((prev) =>
@@ -376,14 +419,29 @@ const EventsPage: React.FC = () => {
       return <div className="text-red-500">Failed to load events</div>;
     }
 
+    if (filteredEvents.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+          <p className="text-lg font-medium mb-2">No events found</p>
+          <p className="text-sm">
+            {currentView === 'registered' ? "You haven't registered for any events yet." :
+             currentView === 'interested' ? "You haven't marked any events as interested yet." :
+             currentView === 'live' ? "No events happening today." :
+             currentView === 'upcoming' ? "No upcoming events found." :
+             "No events match your search criteria."}
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredEvents.map((event) => (
           <EventCard 
             key={event._id} 
             event={event} 
-            isRegistered={userEvents.registeredEvents.includes(event._id)}
-            isInterested={userEvents.interestedEvents.includes(event._id)}
+            isRegistered={userEvents?.registeredEvents?.includes(event._id) || false}
+            isInterested={userEvents?.interestedEvents?.includes(event._id) || false}
           />
         ))}
       </div>
@@ -430,6 +488,8 @@ const EventsPage: React.FC = () => {
         handleCategoryChange={handleCategoryChange}
         selectedInstitutes={selectedInstitutes}
         handleInstituteChange={handleInstituteChange}
+        onViewChange={setCurrentView}
+        currentView={currentView}
       />
       <MainContent
         activeTab={activeTab}

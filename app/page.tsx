@@ -6,7 +6,7 @@ import Footer from "./_components/Footer";
 import Hero from "./_components/Hero";
 import Navbar from "./_components/Navbar";
 import ScrollingLogos from "./_components/ScrollingLogos";
-import TestimonialSection from "./_components/TestimonialSection";
+import Testimonials from "./_components/Testimonials";
 import UserJourney from "./_components/UserJourney";
 
 export default function Home() {
@@ -16,6 +16,7 @@ export default function Home() {
       <Hero/>
       <UserJourney/>
       <ScrollingLogos/>
+      <Testimonials/>
       {/* <AdditionalFeatures/> */}
       {/* <EventList/> */}
       {/* <TestimonialSection/> */}

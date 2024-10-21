@@ -84,7 +84,7 @@ const AnimatedLogo = () => {
   );
 };
 
-// Enhanced CSS Styles for animations
+// Enhanced CSS Styles with new animations
 const styles = `
   @keyframes float {
     0%, 100% { 
@@ -140,6 +140,17 @@ const styles = `
     }
   }
 
+  @keyframes slideDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
   .animate-gradient {
     animation: gradient 8s linear infinite;
   }
@@ -160,6 +171,10 @@ const styles = `
     animation: shine 3s infinite;
   }
 
+  .animate-slideDown {
+    animation: slideDown 0.3s ease-out forwards;
+  }
+
   /* Interactive hover effects */
   .logo:hover .inline-block {
     animation-duration: 1s !important;
@@ -167,6 +182,15 @@ const styles = `
 
   .logo:hover .animate-gradient {
     animation-duration: 4s !important;
+  }
+
+  .progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4f46e5, #ec4899, #8b5cf6);
+    transition: width 0.1s ease-out;
   }
 `;
 
@@ -221,6 +245,7 @@ const UserMenu = () => {
 
 const Navbar = () => {
   const [isFloating, setIsFloating] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { user } = useUser();
 
   useEffect(() => {
@@ -230,6 +255,11 @@ const Navbar = () => {
         const heroHeight = heroSection.offsetHeight;
         const scrollPosition = window.scrollY;
         setIsFloating(scrollPosition > heroHeight);
+
+        // Calculate scroll progress
+        const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = (scrollPosition / windowHeight) * 100;
+        setScrollProgress(progress);
       }
     };
 
@@ -241,9 +271,9 @@ const Navbar = () => {
     <>
       <style>{styles}</style>
       <Card
-        className={`w-full border-b-transparent transition-all duration-300 ${
+        className={`w-full border-b-transparent transition-all duration-500 ${
           isFloating
-            ? "fixed top-0 left-0 right-0 z-50 shadow-xl bg-opacity-90 backdrop-blur-xl"
+            ? "fixed top-0 left-0 right-0 z-50 shadow-xl bg-opacity-90 backdrop-blur-xl animate-slideDown"
             : ""
         }`}
       >
@@ -364,6 +394,12 @@ const Navbar = () => {
             </div>
           </div>
         </CardContent>
+        {isFloating && (
+          <div 
+            className="progress-bar"
+            style={{ width: `${scrollProgress}%` }}
+          />
+        )}
       </Card>
     </>
   );
