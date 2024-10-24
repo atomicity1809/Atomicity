@@ -150,10 +150,10 @@ const MobileNav: React.FC<MobileNavProps> = ({ onClose }) => {
           <ClerkLoaded>
             <SignedOut>
               <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start" onClick={onClose}>
+                <Button variant="outline" className="w-full justify-start">
                   <SignInButton mode="modal" />
                 </Button>
-                <Button variant="default" className="w-full justify-start" onClick={onClose}>
+                <Button variant="default" className="w-full justify-start">
                   <SignUpButton mode="modal" />
                 </Button>
               </div>
