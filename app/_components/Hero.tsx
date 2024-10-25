@@ -49,8 +49,23 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <section id="home" className="bg-gradient-to-b from-white to-purple-200 py-16 min-h-screen flex items-center relative overflow-hidden">
-      <div className="container mx-auto px-4 relative">
+    <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 w-full h-full">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="object-cover w-full h-full"
+        >
+          <source src="/video/event_one.mp4" type="video/mp4" />
+        </video>
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-black bg-opacity-50" />
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -58,7 +73,7 @@ const Hero: React.FC = () => {
           className="flex justify-center mb-12"
         >
           <Image
-            src="/imgs/atomicity_logo.png"
+            src="/imgs/atomicity_logo_white.png"
             alt="Atomicity Logo"
             width={120}
             height={120}
@@ -75,14 +90,14 @@ const Hero: React.FC = () => {
         >
           <motion.h1
             variants={itemVariants}
-            className="text-5xl sm:text-5xl font-bold text-gray-800 mb-8 leading-tight"
+            className="text-5xl sm:text-6xl font-bold text-white mb-8 leading-tight"
             style={{ transform: `translateY(${scrollY * 0.2}px)` }}
           >
-            Discover and Join <span className="text-purple-500">Amazing Events</span>
+            Discover and Join <span className="text-purple-300">Amazing Events</span>
           </motion.h1>
           <motion.p
             variants={itemVariants}
-            className="text-xl sm:text-xl text-gray-700 mb-10"
+            className="text-xl sm:text-2xl text-gray-200 mb-10"
             style={{ transform: `translateY(${scrollY * 0.1}px)` }}
           >
             Find exciting experiences, meet new people, and create lasting memories with our event platform.
@@ -91,11 +106,11 @@ const Hero: React.FC = () => {
             <Link href="/events" passHref prefetch>
               <Button
                 size="lg"
-                className="text-xl px-10 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+                className="text-xl px-10 py-4 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
               >
                 <span className="relative z-10">Explore Events</span>
                 <motion.div
-                  className="absolute inset-0 bg-purple-600"
+                  className="absolute inset-0 bg-purple-800"
                   initial={{ scale: 0, opacity: 0 }}
                   whileHover={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.3 }}
