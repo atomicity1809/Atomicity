@@ -23,6 +23,7 @@ import {
   LoaderIcon,
   MailIcon,
   CheckCircleIcon,
+  QrCodeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -144,6 +145,7 @@ const event: Event = {
 const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
   const [copied, setCopied] = useState(false);
   const eventUrl = `https://atomicity.vercel.app/events/${event._id}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(eventUrl)}`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(eventUrl).then(() => {
@@ -151,6 +153,16 @@ const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
       toast.success("Event link has been copied to clipboard.");
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const downloadQRCode = () => {
+    const link = document.createElement('a');
+    link.href = qrCodeUrl;
+    link.download = `${event.title}-qr-code.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("QR code downloaded successfully");
   };
 
   return (
@@ -176,34 +188,69 @@ const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
             <span>{event.time}</span>
           </div>
           <div className="flex items-center">
-          <MapPinIcon className="h-4 w-4 mr-2" />
-          {event.location && event.location.trim() !== "" ? (
-            <span>{event.location}</span>
-          ) : (
-            <span className="text-purple-500">Online Event</span>
-          )}
+            <MapPinIcon className="h-4 w-4 mr-2" />
+            {event.location && event.location.trim() !== "" ? (
+              <span>{event.location}</span>
+            ) : (
+              <span className="text-purple-500">Online Event</span>
+            )}
           </div>
-          
-
-
         </div>
+
         <div className="mt-4">
           <p className="text-sm mb-2">Share this event:</p>
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              value={eventUrl}
-              readOnly
-              className="flex-1 px-2 py-1 text-sm border rounded"
-            />
-            <Button size="sm" onClick={copyToClipboard}>
-              {copied ? (
-                <CheckIcon className="h-4 w-4" />
-              ) : (
+          <Tabs defaultValue="link" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="link" className="flex items-center gap-2">
                 <CopyIcon className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
+                Link
+              </TabsTrigger>
+              <TabsTrigger value="qr" className="flex items-center gap-2">
+                <QrCodeIcon className="h-4 w-4" />
+                QR Code
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="link" className="mt-2">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={eventUrl}
+                  readOnly
+                  className="flex-1 px-2 py-1 text-sm border rounded"
+                />
+                <Button size="sm" onClick={copyToClipboard}>
+                  {copied ? (
+                    <CheckIcon className="h-4 w-4" />
+                  ) : (
+                    <CopyIcon className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="qr" className="mt-2">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="bg-white p-2 rounded-lg border">
+                  <Image
+                    src={qrCodeUrl}
+                    alt="Event QR Code"
+                    width={160}
+                    height={160}
+                    className="w-[160px] h-[160px]"
+                  />
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={downloadQRCode}
+                >
+                  Download QR Code
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </CardContent>
     </Card>
@@ -1032,56 +1079,65 @@ const EventPage: React.FC = () => {
               </Card>
 
               {/* Share and Favorite */}
-              <div className="flex space-x-4">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="flex-1">
-                      <ShareIcon className="h-5 w-5 mr-2" />
+              <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col space-y-4 z-50">
+                <div className="relative group">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className=" bg-purple-200 rounded-full w-12 h-12 flex items-center justify-center">
+                        <ShareIcon className="h-5 w-5" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" side="left">
+                      <ShareCard event={event} />
+                    </PopoverContent>
+                  </Popover>
+                  {/* Share Tooltip */}
+                  <div className="absolute left-0 transform -translate-x-full -translate-y-1/2 top-1/2 hidden group-hover:block">
+                    <div className="bg-white px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium mr-2 whitespace-nowrap">
                       Share
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <ShareCard event={event} />
-                  </PopoverContent>
-                </Popover>
+                    </div>
+                  </div>
+                </div>
 
-                <motion.div
-                  className="flex items-center space-x-2 rounded-lg px-3 py-1 border border-purple-200"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <motion.button
-                    className="flex items-center justify-center w-8 h-8 rounded-full focus:outline-none"
-                    onClick={handleInterested}
-                    whileTap={{ scale: 0.9 }}
+                <div className="relative group">
+                  <motion.div
+                    className="rounded-full bg-purple-200 border border-purple-200 w-12 h-12 flex items-center justify-center"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <motion.div
-                      className="text-black"
-                      animate={{ 
-                        scale: isInterested ? [1, 1.2, 1] : 1,
-                      }}
-                      transition={{ duration: 0.2 }}
+                    <motion.button
+                      className="flex items-center justify-center w-full h-full rounded-full focus:outline-none"
+                      onClick={handleInterested}
+                      whileTap={{ scale: 0.9 }}
                     >
-                      <Heart
-                        className={`w-5 h-5 transition-colors duration-300 ${
-                          isInterested ? 'text-purple-500 fill-current' : 'text-black'
-                        }`}
-                      />
-                    </motion.div>
-                  </motion.button>
+                      <motion.div
+                        className="text-black"
+                        animate={{ 
+                          scale: isInterested ? [1, 1.2, 1] : 1,
+                        }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Heart
+                          className={`w-5 h-5 transition-colors duration-300 ${
+                            isInterested ? 'text-purple-500 fill-current' : 'text-black'
+                          }`}
+                        />
+                      </motion.div>
+                    </motion.button>
+                  </motion.div>
                   
-                  <motion.span
-                    className="text-xs font-medium"
-                    animate={{ 
-                      color: isInterested ? '#8B5CF6' : '#000000', // purple-500 when interested, black when not
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {isInterested ? "Interested" : "I am Interested"}
-                  </motion.span>
-                </motion.div>
-
+                  {/* Interest Tooltip */}
+                  <div className="absolute left-0 transform -translate-x-full -translate-y-1/2 top-1/2 hidden group-hover:block">
+                    <div 
+                      className={`bg-white px-3 py-1 rounded-lg border border-purple-200 text-xs font-medium mr-2 whitespace-nowrap ${
+                        isInterested ? 'text-purple-500' : 'text-black'
+                      }`}
+                    >
+                      {isInterested ? "Interested" : "I am Interested"}
+                    </div>
+                  </div>
+                </div>
               </div>
               {/* </div> */}
 
