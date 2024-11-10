@@ -74,7 +74,9 @@ import {
 import Admin from "@/models/adminSchema";
 import Head from "next/head";
 import NotFound from "@/app/not-found";
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from "framer-motion";
+// import { StarIcon } from "@heroicons/react/outline";
+import { Input } from "@/components/ui/input";
 
 const MDPreview = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
@@ -145,7 +147,9 @@ const event: Event = {
 const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
   const [copied, setCopied] = useState(false);
   const eventUrl = `https://atomicity.vercel.app/events/${event._id}`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(eventUrl)}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+    eventUrl
+  )}`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(eventUrl).then(() => {
@@ -156,7 +160,7 @@ const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
   };
 
   const downloadQRCode = () => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = qrCodeUrl;
     link.download = `${event.title}-qr-code.png`;
     document.body.appendChild(link);
@@ -210,7 +214,7 @@ const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
                 QR Code
               </TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="link" className="mt-2">
               <div className="flex items-center space-x-2">
                 <input
@@ -240,9 +244,9 @@ const ShareCard: React.FC<{ event: Event }> = ({ event }) => {
                     className="w-[160px] h-[160px]"
                   />
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full"
                   onClick={downloadQRCode}
                 >
@@ -270,6 +274,43 @@ const EventPage: React.FC = () => {
   const [registrationState, setRegistrationState] = useState<
     "initial" | "registering" | "sending_email" | "success"
   >("initial");
+  const [isFeedbackDrawerOpen, setIsFeedbackDrawerOpen] = useState(false);
+  const [starRating, setStarRating] = useState(0);
+  const [feedbackText, setFeedbackText] = useState("");
+  const pathname = usePathname();
+  const eventId = pathname.split("/").pop();
+
+  const handleStarClick = (value: any) => setStarRating(value);
+
+  const handleFeedbackSubmit = async () => {
+    const userId = user?.id; // Clerk user ID
+    const feedback = feedbackText;
+    const rating = starRating;
+    if (!userId || !feedback || !rating || !eventId) return;
+
+    try {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ clerkId: userId, eventId, feedback, rating }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log("Feedback submitted successfully:", result.message);
+        toast.success("Feedback submitted successfully");
+      } else {
+        console.error("Failed to submit feedback:", result.error);
+        toast.error("Failed to submit feedback");
+      }
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      toast.error("Failed to submit feedback");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -361,7 +402,10 @@ const EventPage: React.FC = () => {
         const userName = user?.fullName || "Default Name";
         const eventTitle = event.title || "Default Event Title";
         const eventTime = event.time.toString();
-        const eventLocation = event.location && event.location.trim() !== "" ?  event.location : "Online";
+        const eventLocation =
+          event.location && event.location.trim() !== ""
+            ? event.location
+            : "Online";
 
         const eventImg = event.coverImg;
         const eventOrgName = "Rare Society of Cultural Events";
@@ -385,7 +429,7 @@ const EventPage: React.FC = () => {
             eventImg,
             eventOrgName,
             current_date,
-            userID
+            userID,
           });
           console.log("Confirmation email sent");
           // toast.success("Ticket Sent to Mail !!");
@@ -449,10 +493,10 @@ const EventPage: React.FC = () => {
               </div>
               <div className="flex items-center">
                 <MapPinIcon className="h-4 w-4 mr-2" />
-                  {event.location && event.location.trim() !== "" ? (
-                    <span>{event.location}</span>
-                  ) : (
-                    <span className="italic text-blue-500">Online Event</span>
+                {event.location && event.location.trim() !== "" ? (
+                  <span>{event.location}</span>
+                ) : (
+                  <span className="italic text-blue-500">Online Event</span>
                 )}
               </div>
               <div className="flex items-center">
@@ -532,11 +576,6 @@ const EventPage: React.FC = () => {
   const [orgError, setOrgError] = useState<string | null>(null);
 
   const [bang_loading, bang_setLoading] = useState<boolean>(false);
-
-  const pathname = usePathname();
-  // console.log(pathname);
-  const eventId = pathname.split("/").pop();
-  // console.log("slug: ", eventId);
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -656,42 +695,44 @@ const EventPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-              <motion.div
-                className="flex items-center space-x-2 rounded-lg px-3 py-1 border border-purple-200"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <motion.button
-                  className="flex items-center justify-center w-8 h-8 rounded-full focus:outline-none"
-                  onClick={handleInterested}
-                  whileTap={{ scale: 0.9 }}
+                <motion.div
+                  className="flex items-center space-x-2 rounded-lg px-3 py-1 border border-purple-200"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <motion.div
-                    className="text-black"
-                    animate={{ 
-                      scale: isInterested ? [1, 1.2, 1] : 1,
+                  <motion.button
+                    className="flex items-center justify-center w-8 h-8 rounded-full focus:outline-none"
+                    onClick={handleInterested}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <motion.div
+                      className="text-black"
+                      animate={{
+                        scale: isInterested ? [1, 1.2, 1] : 1,
+                      }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Heart
+                        className={`w-5 h-5 transition-colors duration-300 ${
+                          isInterested
+                            ? "text-purple-500 fill-current"
+                            : "text-black"
+                        }`}
+                      />
+                    </motion.div>
+                  </motion.button>
+
+                  <motion.span
+                    className="text-xs font-medium"
+                    animate={{
+                      color: isInterested ? "#8B5CF6" : "#000000", // purple-500 when interested, black when not
                     }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Heart
-                      className={`w-5 h-5 transition-colors duration-300 ${
-                        isInterested ? 'text-purple-500 fill-current' : 'text-black'
-                      }`}
-                    />
-                  </motion.div>
-                </motion.button>
-                
-                <motion.span
-                  className="text-xs font-medium"
-                  animate={{ 
-                    color: isInterested ? '#8B5CF6' : '#000000', // purple-500 when interested, black when not
-                  }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {isInterested ? "Interested" : "I am Interested"}
-                </motion.span>
-              </motion.div>
+                    {isInterested ? "Interested" : "I am Interested"}
+                  </motion.span>
+                </motion.div>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="flex-1">
@@ -766,10 +807,10 @@ const EventPage: React.FC = () => {
                 </div>
                 <div className="flex items-center">
                   <MapPinIcon className="h-4 w-4 mr-2" />
-                    {event.location && event.location.trim() !== "" ? (
-                      <span>{event.location}</span>
-                    ) : (
-                      <span className="text-white">Online Event</span>
+                  {event.location && event.location.trim() !== "" ? (
+                    <span>{event.location}</span>
+                  ) : (
+                    <span className="text-white">Online Event</span>
                   )}
                 </div>
               </div>
@@ -835,11 +876,11 @@ const EventPage: React.FC = () => {
                         {event.mode !== "online" && (
                           <div className="flex items-center">
                             <MapPinIcon className="h-4 w-4 mr-2" />
-                              {event.location && event.location.trim() !== "" ? (
-                                <span>{event.location}</span>
-                              ) : (
-                                <span className="text-white">Online Event</span>
-                              )}
+                            {event.location && event.location.trim() !== "" ? (
+                              <span>{event.location}</span>
+                            ) : (
+                              <span className="text-white">Online Event</span>
+                            )}
                           </div>
                         )}
                         <div className="flex items-center">
@@ -1078,12 +1119,73 @@ const EventPage: React.FC = () => {
                 </CardContent>
               </Card>
 
+              {/* Feedback Drawer Trigger */}
+              <Button
+                onClick={() => setIsFeedbackDrawerOpen(true)}
+                className="w-full bg-purple-500 hover:bg-purple-700 mt-4"
+              >
+                Write Feedback
+              </Button>
+
+              {/* Drawer for Feedback Form */}
+              {isFeedbackDrawerOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-end">
+                  <div
+                    className="fixed inset-0 bg-black opacity-50"
+                    onClick={() => setIsDrawerOpen(false)}
+                  ></div>
+                  <div className="bg-white p-6 w-80 shadow-lg relative z-10 rounded-lg">
+                    <h2 className="text-2xl font-semibold mb-4">
+                      Feedback Form
+                    </h2>
+
+                    {/* Star Rating Input */}
+                    <div className="flex items-center mb-4">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <StarIcon
+                          key={star}
+                          onClick={() => handleStarClick(star)}
+                          className={`h-6 w-6 cursor-pointer ${
+                            star <= starRating
+                              ? "text-yellow-400"
+                              : "text-gray-400"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Feedback Text Input */}
+                    <Input
+                      type="text"
+                      placeholder="Your feedback..."
+                      value={feedbackText}
+                      onChange={(e) => setFeedbackText(e.target.value)}
+                      className="mb-4"
+                    />
+
+                    {/* Submit Button */}
+                    <Button
+                      onClick={() => {
+                        handleFeedbackSubmit();
+                        setIsFeedbackDrawerOpen(false); // Close drawer on submit
+                      }}
+                      className="w-full bg-purple-500 hover:bg-purple-700"
+                    >
+                      Submit Feedback
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Share and Favorite */}
               <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col space-y-4 z-50">
                 <div className="relative group">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className=" bg-purple-200 rounded-full w-12 h-12 flex items-center justify-center">
+                      <Button
+                        variant="outline"
+                        className=" bg-purple-200 rounded-full w-12 h-12 flex items-center justify-center"
+                      >
                         <ShareIcon className="h-5 w-5" />
                       </Button>
                     </PopoverTrigger>
@@ -1113,25 +1215,27 @@ const EventPage: React.FC = () => {
                     >
                       <motion.div
                         className="text-black"
-                        animate={{ 
+                        animate={{
                           scale: isInterested ? [1, 1.2, 1] : 1,
                         }}
                         transition={{ duration: 0.2 }}
                       >
                         <Heart
                           className={`w-5 h-5 transition-colors duration-300 ${
-                            isInterested ? 'text-purple-500 fill-current' : 'text-black'
+                            isInterested
+                              ? "text-purple-500 fill-current"
+                              : "text-black"
                           }`}
                         />
                       </motion.div>
                     </motion.button>
                   </motion.div>
-                  
+
                   {/* Interest Tooltip */}
                   <div className="absolute left-0 transform -translate-x-full -translate-y-1/2 top-1/2 hidden group-hover:block">
-                    <div 
+                    <div
                       className={`bg-white px-3 py-1 rounded-lg border border-purple-200 text-xs font-medium mr-2 whitespace-nowrap ${
-                        isInterested ? 'text-purple-500' : 'text-black'
+                        isInterested ? "text-purple-500" : "text-black"
                       }`}
                     >
                       {isInterested ? "Interested" : "I am Interested"}
