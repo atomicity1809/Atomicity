@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { connectToDB } from "@/lib/connectToDB";
 import User from "@/models/userSchema";
 
+// get all user data with clerk id
 export async function GET(req: NextRequest) {
   await connectToDB();
   const { pathname } = new URL(req.url);
@@ -28,6 +29,8 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+//update user data
 
 export async function PUT(req: NextRequest) {
   await connectToDB();

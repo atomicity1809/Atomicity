@@ -3,6 +3,7 @@ import { NextResponse,NextRequest } from 'next/server';
 import { connectToDB } from '@/lib/connectToDB';
 import User from '@/models/userSchema';
 
+// create new user
 export async function POST(req:NextRequest) {
     await connectToDB();
 
@@ -16,6 +17,7 @@ export async function POST(req:NextRequest) {
     }
 }
 
+// get all users
 export async function GET(req:NextRequest) {
     await connectToDB();
 

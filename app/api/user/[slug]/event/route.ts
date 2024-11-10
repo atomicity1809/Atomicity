@@ -3,6 +3,7 @@ import { connectToDB } from '@/lib/connectToDB';
 import User from '@/models/userSchema';
 import { Document } from 'mongoose';
 
+// get user reg and int events
 interface UserDocument extends Document {
   registeredEvents: string[];
   interestedEvents: string[];

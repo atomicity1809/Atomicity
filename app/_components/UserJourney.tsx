@@ -1,49 +1,59 @@
-"use client"
+"use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { UserPlus, Search, Ticket, CalendarCheck, Mail, PartyPopper } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  UserPlus,
+  Search,
+  Ticket,
+  CalendarCheck,
+  Mail,
+  PartyPopper,
+} from "lucide-react";
 
 const journey = [
-  { 
-    icon: UserPlus, 
-    title: "Sign Up", 
-    description: "Create your account in seconds and personalize your event preferences.",
-    color: "bg-blue-500" 
+  {
+    icon: UserPlus,
+    title: "Sign Up",
+    description:
+      "Create your account in seconds and personalize your event preferences.",
+    color: "bg-blue-500",
   },
-  { 
-    icon: Search, 
-    title: "Discover Events", 
-    description: "Browse through a curated list of exciting events tailored to your interests.",
-    color: "bg-green-500"
+  {
+    icon: Search,
+    title: "Discover Events",
+    description:
+      "Browse through a curated list of exciting events tailored to your interests.",
+    color: "bg-green-500",
   },
-  { 
-    icon: Ticket, 
-    title: "Book Tickets", 
+  {
+    icon: Ticket,
+    title: "Book Tickets",
     description: "Secure your spot with our easy and secure booking process.",
-    color: "bg-yellow-500"
+    color: "bg-yellow-500",
   },
-  { 
-    icon: CalendarCheck, 
-    title: "Event Reminders", 
-    description: "Receive timely notifications to keep you updated about your upcoming event.",
-    color: "bg-red-500"
-  },
-  { 
-    icon: Mail, 
-    title: "E-Ticket Delivery", 
+  {
+    icon: Mail,
+    title: "E-Ticket Delivery",
     description: "Get your e-ticket delivered straight to your inbox.",
-    color: "bg-purple-500"
+    color: "bg-purple-500",
   },
-  { 
-    icon: PartyPopper, 
-    title: "Enjoy the Event", 
+  {
+    icon: CalendarCheck,
+    title: "Event Reminders",
+    description:
+      "Receive timely notifications to keep you updated about your upcoming event.",
+    color: "bg-red-500",
+  },
+  {
+    icon: PartyPopper,
+    title: "Enjoy the Event",
     description: "Have an amazing time at your event!",
-    color: "bg-pink-500"
-  }
+    color: "bg-pink-500",
+  },
 ];
 
 const UserJourney: React.FC = () => {
@@ -51,11 +61,17 @@ const UserJourney: React.FC = () => {
     <section className="py-8 bg-gradient-to-b from-purple-200 to-purple-500">
       <div className="container mx-auto px-4">
         <h2 className="text-6xl font-bold text-center text-purple-500 mb-12">
-          Your Journey to <span className='text-white'>Unforgettable Events</span>
+          Your Journey to{" "}
+          <span className="text-white">Unforgettable Events</span>
         </h2>
         <div className="max-w-4xl mx-auto">
           {journey.map((step, index) => (
-            <TimelineStep key={index} step={step} index={index} totalSteps={journey.length} />
+            <TimelineStep
+              key={index}
+              step={step}
+              index={index}
+              totalSteps={journey.length}
+            />
           ))}
         </div>
       </div>
@@ -74,7 +90,11 @@ interface TimelineStepProps {
   totalSteps: number;
 }
 
-const TimelineStep: React.FC<TimelineStepProps> = ({ step, index, totalSteps }) => {
+const TimelineStep: React.FC<TimelineStepProps> = ({
+  step,
+  index,
+  totalSteps,
+}) => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -105,7 +125,9 @@ const TimelineStep: React.FC<TimelineStepProps> = ({ step, index, totalSteps }) 
       <Card className="flex-grow">
         <CardContent className="pt-6">
           <div className="flex items-center mb-2">
-            <h3 className="text-xl font-semibold text-purple-800 mr-2">{step.title}</h3>
+            <h3 className="text-xl font-semibold text-purple-800 mr-2">
+              {step.title}
+            </h3>
             <Badge variant="secondary">Step {index + 1}</Badge>
           </div>
           <p className="text-gray-600">{step.description}</p>
